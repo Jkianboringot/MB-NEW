@@ -15,7 +15,7 @@ return new class extends Migration
             // $table->id();
             $table->foreignId('supplier_ledger_id')->constrained();
             $table->decimal('amount_paid')->unsigned();
-            //we will just use the updated_at as the last payment column, no we cannot becuase this can be edited
+            // we will just use the updated_at as the last payment column, no we cannot becuase this can be edited
             $table->date('last_payment_date')->default(now());
             $table->timestamps();
         });

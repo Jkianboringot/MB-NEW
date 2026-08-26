@@ -4,7 +4,5 @@ namespace App\Services;
 
 class PayrollService
 {
-    public function create($data){
-        return;
-    }
+    public function create($data) {}
 }

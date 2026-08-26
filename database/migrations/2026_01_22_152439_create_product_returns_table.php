@@ -14,15 +14,15 @@ return new class extends Migration
         // REMOVE
 
         Schema::create('product_returns', function (Blueprint $table) {
-         $table->foreignId('product_id')->constrained();
+            $table->foreignId('product_id')->constrained();
             $table->foreignId('returned_id')->constrained();
-            $table->decimal('price',8,2)->unsigned()->default(0);
-            $table->decimal('quantity',8,2)->unsigned()->default(0);
+            $table->decimal('price', 8, 2)->unsigned()->default(0);
+            $table->decimal('quantity', 8, 2)->unsigned()->default(0);
 
-            $table->primary(['product_id','returned_id']);
+            $table->primary(['product_id', 'returned_id']);
 
-            //price and quantity , maybe i will just use validation at this point, doing an
-            //extra raw db will just cause too much query 
+            // price and quantity , maybe i will just use validation at this point, doing an
+            // extra raw db will just cause too much query
             $table->timestamps();
         });
     }

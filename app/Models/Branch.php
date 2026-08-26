@@ -8,34 +8,30 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Branch extends Model
 {
-  protected $fillable = ['location', 'type_branch'];
+    protected $fillable = ['location', 'type_branch'];
 
+    // public function ingredients(): BelongsToMany
+    // {
+    //   return $this->belongsToMany(Ingredient::class, 'ingredient_branchs');
+    // }
 
-  // public function ingredients(): BelongsToMany
-  // {
-  //   return $this->belongsToMany(Ingredient::class, 'ingredient_branchs');
-  // }
+    public function addIngredients(): HasMany
+    {
+        return $this->hasMany(AddIngredient::class);
+    }
 
+    public function order(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
 
+    public function reuturned(): HasMany
+    {
+        return $this->hasMany(Returned::class);
+    }
 
-  public function addIngredients(): HasMany
-  {
-    return $this->hasMany(AddIngredient::class);
-  }
-
-  public function order(): HasMany
-  {
-    return $this->hasMany(Order::class);
-  }
-
-  public function reuturned(): HasMany
-  {
-    return $this->hasMany(Returned::class);
-  }
-  public function users(): HasMany
-  {
-    return $this->hasMany(User::class);
-  }
-
-
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
 }

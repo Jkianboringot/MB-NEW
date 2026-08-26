@@ -17,9 +17,8 @@ return new class extends Migration
             $table->id();
             $table->boolean('status')->default(false); // remove this
             $table->foreignId('branch_id')->constrained('branches');
-            $table->index('branch_id','orders_branch_id_index');//even if its small its essential for faster query and filter
-//even if its small its essential for faster query and filter go ingredient table and read example 
-
+            $table->index('branch_id', 'orders_branch_id_index'); // even if its small its essential for faster query and filter
+            // even if its small its essential for faster query and filter go ingredient table and read example
 
             $table->timestamps();
             $table->softDeletes();
@@ -28,7 +27,6 @@ return new class extends Migration
             // $table->foreignId('product_id')->constrained();
             // $table->integer('price');
             // >>>>>>> playground
-
 
         });
     }

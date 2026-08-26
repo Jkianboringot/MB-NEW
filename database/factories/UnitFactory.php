@@ -16,7 +16,7 @@ class UnitFactory extends Factory
                 'Bundle',
                 'Carton',
             ]),
-            'pieces_per_unit' => $this->faker->numberBetween(5,20),
+            'pieces_per_unit' => $this->faker->numberBetween(5, 20),
             'created_at' => now(),
             'updated_at' => now(),
 

@@ -2,7 +2,7 @@ import { Head } from '@inertiajs/react';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 // import { branch } from '@/routes';
 
-export default function Branch() {
+export default function Product() {
     return (
         <>
             {'fuck you'}
@@ -10,10 +10,10 @@ export default function Branch() {
     );
 }
 
-Branch.layout = {
+Product.layout = {
     breadcrumbs: [
         {
-            title: 'Branch',
+            title: 'Product',
         },
     ],
 };

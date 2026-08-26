@@ -10,13 +10,13 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-        // REMOVE
+    // REMOVE
     {
         Schema::create('product_ingredients', function (Blueprint $table) {
             $table->foreignId('product_id')->constrained();
             $table->foreignId('ingredient_id')->constrained();
-            
-            $table->primary(['product_id','ingredient_id']);
+
+            $table->primary(['product_id', 'ingredient_id']);
 
             $table->integer('quantity')->unsigned()->default(0);
         });

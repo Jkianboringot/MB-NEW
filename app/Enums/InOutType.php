@@ -4,6 +4,6 @@ namespace App\Enums;
 
 enum InOutType: string
 {
-    case In='in';
-    case Out='out';
+    case In = 'in';
+    case Out = 'out';
 }

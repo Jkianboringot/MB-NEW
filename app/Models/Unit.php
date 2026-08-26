@@ -12,9 +12,8 @@ class Unit extends Model
 
     public $fillable = ['name', 'pieces_per_unit'];
 
-
     public function ingredients(): HasMany
     {
         return $this->hasMany(Ingredient::class);
-    }//one to many
+    }// one to many
 }

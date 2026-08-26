@@ -2,10 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Models\Employee;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Employee>
+ * @extends Factory<Employee>
  */
 class EmployeeFactory extends Factory
 {
@@ -17,7 +18,7 @@ class EmployeeFactory extends Factory
     public function definition(): array
     {
         return [
-            'employee_code' => 'EMP-' . $this->faker->unique()->numberBetween(1000, 9999),
+            'employee_code' => 'EMP-'.$this->faker->unique()->numberBetween(1000, 9999),
 
             'first_name' => $this->faker->firstName(),
             'last_name' => $this->faker->lastName(),

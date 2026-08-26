@@ -30,7 +30,7 @@ class ProductSeeder extends Seeder
                 $pivotData[] = [
                     'product_id' => $productId,
                     'ingredient_id' => $ingredientId,
-                    'quantity' => rand(1, 5)
+                    'quantity' => rand(1, 5),
                 ];
             }
 

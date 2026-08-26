@@ -3,10 +3,11 @@
 namespace Database\Factories;
 
 use App\Models\Category;
+use App\Models\Ingredient;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Ingredient>
+ * @extends Factory<Ingredient>
  */
 class IngredientFactory extends Factory
 {
@@ -18,8 +19,8 @@ class IngredientFactory extends Factory
     public function definition(): array
     {
         return [
-               'name' => $this->faker->unique()->words(2,true),
-            'threshold' => $this->faker->numberBetween(5,25),
+            'name' => $this->faker->unique()->words(2, true),
+            'threshold' => $this->faker->numberBetween(5, 25),
             'category_id' => Category::inRandomOrder()->value('id'),
         ];
     }

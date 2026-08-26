@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-          $this->call([
+        $this->call([
             CategorySeeder::class,
             UnitSeeder::class,
 
@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
             // EmployeeSeeder::class,
             UserSeeder::class,
             // ProductSeeder::class,
-            ]
+        ]
         );
     }
 }

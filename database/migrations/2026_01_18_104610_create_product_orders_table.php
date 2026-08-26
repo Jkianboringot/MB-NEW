@@ -16,12 +16,10 @@ return new class extends Migration
         Schema::create('product_orders', function (Blueprint $table) {
             $table->foreignId('product_id')->constrained();
             $table->foreignId('order_id')->constrained();
-            $table->decimal('price',8,2)->unsigned()->default(0);
-            $table->decimal('quantity',8,2)->unsigned()->default(0);
+            $table->decimal('price', 8, 2)->unsigned()->default(0);
+            $table->decimal('quantity', 8, 2)->unsigned()->default(0);
 
-            
-            $table->primary(['product_id','order_id']);
-            
+            $table->primary(['product_id', 'order_id']);
 
             $table->timestamps();
         });

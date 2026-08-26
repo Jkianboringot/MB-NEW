@@ -23,8 +23,8 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
      {
-        title: 'Branchs',
-        href: '/branchs',
+        title: 'Product',
+        href: '/products',
         icon: House,
     },
 ];
