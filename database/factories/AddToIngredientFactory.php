@@ -3,11 +3,10 @@
 namespace Database\Factories;
 
 use App\Models\Branch;
-use App\Models\Model;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<Model>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Model>
  */
 class AddToIngredientFactory extends Factory
 {
@@ -19,7 +18,7 @@ class AddToIngredientFactory extends Factory
     public function definition(): array
     {
         return [
-            'branch_id' => Branch::inRandomOrder()->value('id'),
+                'branch_id' => Branch::inRandomOrder()->value('id'),
         ];
     }
 }

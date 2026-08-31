@@ -7,21 +7,21 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProductReturn extends Model
 {
-    protected $table = 'product_returns';
-
+       protected $table = 'product_returns';
+    
     protected $fillable = [
         'product_id',
         'returned_id',
         'quantity',
-        'price',
+        'price'
     ];
-
+    
     protected $casts = [
         'quantity' => 'decimal:2',
         'price' => 'decimal:2',
     ];
 
-    public function product()
+       public function product()
     {
         return $this->belongsTo(Product::class);
     }

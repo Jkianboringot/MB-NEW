@@ -9,9 +9,8 @@ class Tag extends Model
 {
     public $guarded = ['id'];
 
-    public function products(): BelongsToMany
-    {
+    public function products() : BelongsToMany {
         return $this->belongsToMany(Product::class);
-
+        
     }
 }

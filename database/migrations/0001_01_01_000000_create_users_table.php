@@ -14,11 +14,21 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
+            $table->string('email')->unique(); //index successfull, unique auto index
+            // $table->foreignId('branch_id')->constrained()->nullable();
+            // its fine to be nullable as not all user create need to have an assign branch
+            //straight away, their is still processing
             $table->string('password');
+            // $table->index('name','user_name_index'); contemplating this one
+            // $table->index('branch_id','user_branch_id_index');
+
             $table->rememberToken();
             $table->timestamps();
+
+            // $table->timestamp('email_verified_at')->nullable();
+
+            // $table->foreignId('current_team_id')->nullable();
+            // $table->string('profile_photo_path', 2048)->nullable();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use Hash;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -16,17 +17,18 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // User::factory(10)->create();
-
         $this->call([
             CategorySeeder::class,
             UnitSeeder::class,
+            ProductSeeder::class,
 
-            IngredientSeeder::class,
             BranchSeeder::class,
             // EmployeeSeeder::class,
             UserSeeder::class,
-            // ProductSeeder::class,
-        ]
+            InventorySeeder::class,
+            // SaleSeeder::class,
+            ]
         );
+    
     }
 }

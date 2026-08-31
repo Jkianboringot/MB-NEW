@@ -3,8 +3,10 @@
 namespace Database\Seeders;
 
 use App\Models\AddIngredient;
+use App\Models\Branch;
 use App\Models\Ingredient;
 use App\Models\Product;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -31,7 +33,7 @@ class AddIngredientSeeder extends Seeder
                 $pivotData[] = [
                     'product_id' => $addIngredientId,
                     'ingredient_id' => $ingredientId,
-                    'quantity' => rand(1, 5),
+                    'quantity' => rand(1, 5)
                 ];
             }
             DB::table('product_ingredients')->insert($pivotData);

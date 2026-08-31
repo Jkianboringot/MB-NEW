@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Tag;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class TagSeeder extends Seeder
@@ -13,7 +14,7 @@ class TagSeeder extends Seeder
     public function run(): void
     {
         Tag::insert([
-            ['name' => 'onsale'], ['name' => 'new edition'], ['name' => 'trending'],
+            ['name'=>'onsale'],['name'=>'new edition'],['name'=>'trending']
         ]);
     }
 }

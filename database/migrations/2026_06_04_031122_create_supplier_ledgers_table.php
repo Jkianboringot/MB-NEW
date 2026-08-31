@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('supplier_ledgers', function (Blueprint $table) {
             $table->id();
             $table->decimal('total_payable')->unsigned();
-            $table->string('status', 20)->default(SupplierLedgerStatus::Active->value);
+            $table->string('status',20)->default(SupplierLedgerStatus::Active->value);
             $table->foreignId('inventory_id')->constrained();
             $table->timestamps();
         });

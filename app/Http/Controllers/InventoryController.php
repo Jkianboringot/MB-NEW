@@ -1,0 +1,149 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Enums\InOutType;
+use App\Models\Branch;
+use App\Models\Inventory;
+use App\Models\Product;
+use App\Services\InventoryService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class InventoryController extends Controller
+{
+    public function __construct(protected InventoryService $inventoryService)
+    {
+    }
+
+    /**
+     * List all inventory records (both IN and OUT), same data the
+     * Filament table showed.
+     */
+    public function index(): Response
+    {
+        $inventories = Inventory::with(['branchs', 'encoder', 'sales'])
+            ->latest()
+            ->paginate(15)
+            ->through(fn (Inventory $inv) => [
+                'id'             => $inv->id,
+                'type'           => $inv->type,
+                'inventory_type' => $inv->inventory_type,
+                'branch'         => $inv->branchs?->location,
+                'encoder'        => $inv->encoder?->name,
+                'cash_amount'    => $inv->sales?->cash_amount,
+                'total_cash'     => $inv->sales?->total_cash,
+                'created_at'     => $inv->created_at->format('M d, Y g:i A'),
+            ]);
+
+        return Inertia::render('Inventories/Index', [
+            'inventories' => $inventories,
+        ]);
+    }
+
+    /**
+     * Show the "Stock In" form. Product list is open to every product —
+     * a delivery can introduce a new product to a branch.
+     */
+    public function createIn(): Response
+    {
+        return Inertia::render('Inventories/CreateIn', [
+            'branches' => Branch::select('id', 'location', 'branch_type')->get(),
+            'products' => Product::select('id', 'name', 'price')->get(),
+        ]);
+    }
+
+    public function storeIn(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'branch_id'                => ['required', 'exists:branches,id'],
+            'inventory_type'           => ['required', 'string'],
+            'productList'              => ['required', 'array', 'min:1'],
+            'productList.*.product_id' => ['required', 'exists:products,id'],
+            'productList.*.quantity'   => ['required', 'numeric', 'min:0.01'],
+        ]);
+
+        $inv = $this->inventoryService->inventoryIn([
+            'branch_id'   => $data['branch_id'],
+            'inventory'   => [
+                'inventory_type' => $data['inventory_type'],
+                'encoder_id'     => auth()->id(),
+            ],
+            'productList' => $data['productList'],
+        ]);
+
+        if (! $inv) {
+            return back()->with('error', 'Failed to record stock in. Check the logs.');
+        }
+
+        return redirect()
+            ->route('inventories.index')
+            ->with('success', 'Stock in recorded.');
+    }
+
+    /**
+     * Show the "Stock Out" form. Sends every branch along with the
+     * products it already carries (with current quantity), so the
+     * frontend can filter/display stock without extra requests.
+     */
+    public function createOut(): Response
+    {
+        $branches = Branch::with('products')->get()->map(fn (Branch $branch) => [
+            'id'       => $branch->id,
+            'location' => $branch->location,
+            'products' => $branch->products->map(fn (Product $product) => [
+                'id'       => $product->id,
+                'name'     => $product->name,
+                'quantity' => $product->pivot->quantity,
+            ]),
+        ]);
+
+        return Inertia::render('Inventories/CreateOut', [
+            'branches' => $branches,
+        ]);
+    }
+
+    public function storeOut(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'branch_id'                => ['required', 'exists:branches,id'],
+            'productList'              => ['required', 'array', 'min:1'],
+            'productList.*.product_id' => ['required', 'exists:products,id'],
+            'productList.*.quantity'   => ['required', 'numeric', 'min:0.01'],
+            'shift'                    => ['required', 'string'],
+            'cash_amount'              => ['required', 'numeric'],
+            'adv_collection'           => ['required', 'numeric'],
+            'gcash_amount'             => ['required', 'numeric'],
+            'cash_advance'             => ['required', 'numeric'],
+            'remitted_expenses'        => ['required', 'numeric'],
+            'sale_short'               => ['nullable', 'numeric'],
+            'total_cash'               => ['required', 'numeric'],
+        ]);
+
+        $inv = $this->inventoryService->inventoryOut([
+            'branch_id'   => $data['branch_id'],
+            'inventory'   => [],
+            'productList' => $data['productList'],
+            'sale' => [
+                'shift'             => $data['shift'],
+                'cash_amount'       => $data['cash_amount'],
+                'adv_collection'    => $data['adv_collection'],
+                'gcash_amount'      => $data['gcash_amount'],
+                'cash_advance'      => $data['cash_advance'],
+                'remitted_expenses' => $data['remitted_expenses'],
+                'sale_short'        => $data['sale_short'] ?? 0,
+                'total_cash'        => $data['total_cash'],
+            ],
+        ]);
+
+        if (! $inv) {
+            return back()->with('error', 'Failed to record sale. Check the logs.');
+        }
+
+        return redirect()
+            ->route('inventories.index')
+            ->with('success', 'Sale recorded.');
+    }
+}

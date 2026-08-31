@@ -16,15 +16,16 @@ class Returned extends Model
             ->withPivot(['price', 'quantity']);
     }
 
+
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
-
+         
     }
 
-    public function branch(): BelongsTo
+         public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class);
-
+         
     }
 }

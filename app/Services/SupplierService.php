@@ -2,4 +2,6 @@
 
 namespace App\Services;
 
-class SupplierService {}
+class SupplierService
+{
+}

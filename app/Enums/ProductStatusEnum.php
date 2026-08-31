@@ -5,25 +5,23 @@ namespace App\Enums;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
-enum ProductStatusEnum: string implements HasColor, HasLabel
-    // its important to have this import like haslavel, and has color to put
-    // color in your badge
+enum ProductStatusEnum: string implements HasLabel,HasColor
+    //its important to have this import like haslavel, and has color to put 
+    //color in your badge
 {
-    case IN_STOCK = 'In Stock';
-    case SOLD_OUT = 'Sold Out';
-    case COMING_SOON = 'Coming Soon';
+    case IN_STOCK='In Stock';
+    case SOLD_OUT='Sold Out';
+    case COMING_SOON='Coming Soon';
 
-    public function getLabel(): string
-    {
+    public function getLabel(): string{
         return $this->value;
     }
 
-    public function getColor(): string
-    {
-        return match ($this) {
-            self::IN_STOCK => 'success',
-            self::SOLD_OUT => 'danger',
-            self::COMING_SOON => 'warning',
+    public function getColor(): string{
+        return match($this){
+        self::IN_STOCK=>'success',
+        self::SOLD_OUT=>'danger',
+        self::COMING_SOON=>'warning',
 
         };
     }
