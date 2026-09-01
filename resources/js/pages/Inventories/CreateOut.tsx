@@ -37,6 +37,7 @@ export default function CreateOut({ branches }: Props) {
         gcash_amount: number;
         cash_advance: number;
         remitted_expenses: number;
+        net_cash: number;
     }>({
         branch_id: '',
         productList: [{ product_id: '', quantity: 1 }],
@@ -46,6 +47,7 @@ export default function CreateOut({ branches }: Props) {
         gcash_amount: 0,
         cash_advance: 0,
         remitted_expenses: 0,
+        net_cash: 0,
     });
 
     const selectedBranch = useMemo(
@@ -61,7 +63,7 @@ export default function CreateOut({ branches }: Props) {
             Number(data.remitted_expenses) -
             Number(data.sale_short)
         );
-    }, [data.cash_amount, data.gcash_amount, data.cash_advance, data.adv_collection, data.remitted_expenses, data.sale_short]);
+    }, [data.cash_amount, data.gcash_amount, data.cash_advance,data.remitted_expenses, data.sale_short]);
 
     function handleBranchChange(branchId: number) {
         setData((prev) => ({
@@ -105,10 +107,10 @@ export default function CreateOut({ branches }: Props) {
 
     function submit(e: FormEvent) {
         e.preventDefault();
+        data.net_cash=total_cash
         post(storeOut().url, {
             data: {
-                ...data,
-                total_cash,
+                ...data
             },
         });
     }
@@ -238,7 +240,6 @@ export default function CreateOut({ branches }: Props) {
                             <MoneyField label="Cash Shortage" value={data.sale_short} onChange={(v) => setData('sale_short', v)} error={errors.sale_short} />
                             <MoneyField label="Gcash" value={data.gcash_amount} onChange={(v) => setData('gcash_amount', v)} error={errors.gcash_amount} />
                             <MoneyField label="Cash Advance" value={data.cash_advance} onChange={(v) => setData('cash_advance', v)} error={errors.cash_advance} />
-                            <MoneyField label="Advance Collection" value={data.adv_collection} onChange={(v) => setData('adv_collection', v)} error={errors.adv_collection} />
                             <MoneyField label="Remitted Expenses" value={data.remitted_expenses} onChange={(v) => setData('remitted_expenses', v)} error={errors.remitted_expenses} />
                         </div>
 
