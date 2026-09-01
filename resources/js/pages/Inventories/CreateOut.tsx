@@ -63,7 +63,7 @@ export default function CreateOut({ branches }: Props) {
             Number(data.remitted_expenses) -
             Number(data.sale_short)
         );
-    }, [data.cash_amount, data.gcash_amount, data.cash_advance,data.remitted_expenses, data.sale_short]);
+    }, [data.cash_amount, data.gcash_amount, data.cash_advance, data.remitted_expenses, data.sale_short]);
 
     function handleBranchChange(branchId: number) {
         setData((prev) => ({
@@ -107,9 +107,10 @@ export default function CreateOut({ branches }: Props) {
 
     function submit(e: FormEvent) {
         e.preventDefault();
-        data.net_cash=total_cash
+        setData('net_cash', total_cash);
         post(storeOut().url, {
             data: {
+                ...data
                 ...data
             },
         });
