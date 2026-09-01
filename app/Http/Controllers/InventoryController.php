@@ -10,6 +10,7 @@ use App\Models\Product;
 use App\Services\InventoryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rules\Enum;
 use Inertia\Inertia;
 use Inertia\Response;
 use Str;
@@ -53,7 +54,7 @@ class InventoryController extends Controller
     public function createIn(): Response
     {
         return Inertia::render('Inventories/CreateIn', [
-            'stockMovementTypes'=>collect(StockMovementType::cases())->map(fn($cases)=>['value'=>$cases->value,'label'=>Str::headline($cases->name)]),
+            'stockMovementTypes' => collect(StockMovementType::cases())->map(fn($cases) => ['value' => $cases->value, 'label' => Str::headline($cases->name)]),
             'branches' => Branch::select('id', 'location', 'branch_type')->get(),
             'products' => Product::select('id', 'name', 'price')->get(),
         ]);
@@ -63,10 +64,10 @@ class InventoryController extends Controller
     {
         $data = $request->validate([
             'branch_id' => ['required', 'exists:branches,id'],
-            'stock_movement_type' => ['required', 'string'],
-            'productList' => ['required', 'array', 'min:1'],
+            'stock_movement_type' => ['required', new Enum(StockMovementType::class)],
+            'productList' => ['required', 'array', 'max:9999','min:1'],
             'productList.*.product_id' => ['required', 'exists:products,id'],
-            'productList.*.quantity' => ['required', 'numeric', 'min:0.01'],
+            'productList.*.quantity' => ['required', 'numeric', 'max:9999','min:0.01'],
         ]);
 
         $inv = $this->inventoryService->inventoryIn([
@@ -107,7 +108,7 @@ class InventoryController extends Controller
         ]);
 
         return Inertia::render('Inventories/CreateOut', [
-            'stockMovementType'=>collect(StockMovementType::cases())->map(fn($cases)=>['value'=>$cases->value,'label'=>Str::headline($cases->name)]),
+            'stockMovementType' => collect(StockMovementType::cases())->map(fn($cases) => ['value' => $cases->value, 'label' => Str::headline($cases->name)]),
 
             'branches' => $branches,
         ]);

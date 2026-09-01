@@ -111,7 +111,6 @@ export default function CreateOut({ branches }: Props) {
         post(storeOut().url, {
             data: {
                 ...data
-                ...data
             },
         });
     }
