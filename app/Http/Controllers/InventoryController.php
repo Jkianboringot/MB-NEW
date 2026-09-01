@@ -6,6 +6,7 @@ use App\Enums\InOutType;
 use App\Enums\StockMovementType;
 use App\Http\Requests\StoreInInventoryRequest;
 use App\Http\Requests\StoreInventoryRequest;
+use App\Http\Requests\StoreOutInventoryRequest;
 use App\Models\Branch;
 use App\Models\Inventory;
 use App\Models\Product;
@@ -62,7 +63,7 @@ class InventoryController extends Controller
         ]);
     }
 
-    public function storeIn(StoreInInventoryRequest  $request): RedirectResponse
+    public function storeIn(StoreInInventoryRequest $request): RedirectResponse
     {
         $data = $request->validated();
 
@@ -110,22 +111,10 @@ class InventoryController extends Controller
         ]);
     }
 
-    public function storeOut(Request $request): RedirectResponse
+    public function storeOut(StoreOutInventoryRequest $request): RedirectResponse
     {
         // dd($request);
-        $data = $request->validate([
-            'branch_id' => ['required', 'exists:branches,id'],
-            'productList' => ['required', 'array', 'min:1'],
-            'productList.*.product_id' => ['required', 'exists:products,id'],
-            'productList.*.quantity' => ['required', 'numeric', 'min:0.01'],
-            'shift' => ['required', 'string'],
-            'cash_amount' => ['required', 'numeric'],
-            'gcash_amount' => ['required', 'numeric'],
-            'cash_advance' => ['required', 'numeric'],
-            'remitted_expenses' => ['required', 'numeric'],
-            'sale_short' => ['nullable', 'numeric'],
-            'net_cash' => ['required', 'numeric'],
-        ]);
+        $data = $request->validated();
 
         $inv = $this->inventoryService->inventoryOut([
             'branch_id' => $data['branch_id'],
