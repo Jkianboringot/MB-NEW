@@ -25,7 +25,7 @@ return new class extends Migration
             // i think we can just derive this shift from payout/
             // SOLUTION no keep shift here it is correct hte point is to track sale for each shiftf
             $table->string('shift',40)->default(Shift::Opening->value);
-            $table->decimal('cash_amount',8,2)->unsigned()->nullable();
+            $table->decimal('cash_amount',8,2)->unsigned();
             $table->decimal('cash_advance',8,2)->unsigned()->nullable();
 
             $table->decimal('cash_shortage',8,2)->unsigned()->nullable();
@@ -38,7 +38,7 @@ return new class extends Migration
             // , so am asking myself is better to just have one extra column that i can use in overall cash too 
             // and quick read or just auto calcualte it, becuase am planning to have one table for the driff it pretty 
             // much calculate the sale and save it in the table and in that table we read it thier
-            $table->decimal('net_cash',8,2)->unsigned()->nullable();
+            $table->decimal('net_cash',8,2)->unsigned();
 
             $table->timestamps();
         });
