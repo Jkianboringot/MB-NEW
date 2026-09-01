@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\InOutType;
+use App\Enums\StockMovementType;
 use App\Models\Branch;
 use App\Models\Inventory;
 use App\Models\Product;
@@ -11,6 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Str;
 
 class InventoryController extends Controller
 {
@@ -27,15 +29,16 @@ class InventoryController extends Controller
         $inventories = Inventory::with(['branchs', 'encoder', 'sales'])
             ->latest()
             ->paginate(15)
-            ->through(fn (Inventory $inv) => [
-                'id'             => $inv->id,
-                'type'           => $inv->type,
+            ->through(fn(Inventory $inv) => [
+                'id' => $inv->id,
+                'type' => $inv->type,
                 'inventory_type' => $inv->inventory_type,
-                'branch'         => $inv->branchs?->location,
-                'encoder'        => $inv->encoder?->name,
-                'cash_amount'    => $inv->sales?->cash_amount,
-                'total_cash'     => $inv->sales?->total_cash,
-                'created_at'     => $inv->created_at->format('M d, Y g:i A'),
+                'stock_movement_type' => $inv->stock_movement_type,
+                'branch' => $inv->branchs?->location,
+                'encoder' => $inv->encoder?->name,
+                'cash_amount' => $inv->sales?->cash_amount,
+                'total_cash' => $inv->sales?->total_cash,
+                'created_at' => $inv->created_at->format('M d, Y g:i A'),
             ]);
 
         return Inertia::render('Inventories/Index', [
@@ -50,6 +53,7 @@ class InventoryController extends Controller
     public function createIn(): Response
     {
         return Inertia::render('Inventories/CreateIn', [
+            'stockMovementTypes'=>collect(StockMovementType::cases())->map(fn($cases)=>['value'=>$cases->value,'label'=>Str::headline($cases->name)]),
             'branches' => Branch::select('id', 'location', 'branch_type')->get(),
             'products' => Product::select('id', 'name', 'price')->get(),
         ]);
@@ -58,23 +62,25 @@ class InventoryController extends Controller
     public function storeIn(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'branch_id'                => ['required', 'exists:branches,id'],
-            'inventory_type'           => ['required', 'string'],
-            'productList'              => ['required', 'array', 'min:1'],
+            'branch_id' => ['required', 'exists:branches,id'],
+            'stock_movement_type' => ['required', 'string'],
+            'productList' => ['required', 'array', 'min:1'],
             'productList.*.product_id' => ['required', 'exists:products,id'],
-            'productList.*.quantity'   => ['required', 'numeric', 'min:0.01'],
+            'productList.*.quantity' => ['required', 'numeric', 'min:0.01'],
         ]);
 
         $inv = $this->inventoryService->inventoryIn([
-            'branch_id'   => $data['branch_id'],
-            'inventory'   => [
-                'inventory_type' => $data['inventory_type'],
-                'encoder_id'     => auth()->id(),
+            'branch_id' => $data['branch_id'],
+            'inventory' => [
+                'inventory_type' => InOutType::In,
+                'stock_movement_type' => $data['stock_movement_type'],
+
+                'encoder_id' => auth()->id(),
             ],
             'productList' => $data['productList'],
         ]);
 
-        if (! $inv) {
+        if (!$inv) {
             return back()->with('error', 'Failed to record stock in. Check the logs.');
         }
 
@@ -90,55 +96,56 @@ class InventoryController extends Controller
      */
     public function createOut(): Response
     {
-        $branches = Branch::with('products')->get()->map(fn (Branch $branch) => [
-            'id'       => $branch->id,
+        $branches = Branch::with('products')->get()->map(fn(Branch $branch) => [
+            'id' => $branch->id,
             'location' => $branch->location,
-            'products' => $branch->products->map(fn (Product $product) => [
-                'id'       => $product->id,
-                'name'     => $product->name,
+            'products' => $branch->products->map(fn(Product $product) => [
+                'id' => $product->id,
+                'name' => $product->name,
                 'quantity' => $product->pivot->quantity,
             ]),
         ]);
 
         return Inertia::render('Inventories/CreateOut', [
+            'stockMovementType'=>collect(StockMovementType::cases())->map(fn($cases)=>['value'=>$cases->value,'label'=>Str::headline($cases->name)]),
+
             'branches' => $branches,
         ]);
     }
 
     public function storeOut(Request $request): RedirectResponse
     {
+        // dd($request);
         $data = $request->validate([
-            'branch_id'                => ['required', 'exists:branches,id'],
-            'productList'              => ['required', 'array', 'min:1'],
+            'branch_id' => ['required', 'exists:branches,id'],
+            'productList' => ['required', 'array', 'min:1'],
             'productList.*.product_id' => ['required', 'exists:products,id'],
-            'productList.*.quantity'   => ['required', 'numeric', 'min:0.01'],
-            'shift'                    => ['required', 'string'],
-            'cash_amount'              => ['required', 'numeric'],
-            'adv_collection'           => ['required', 'numeric'],
-            'gcash_amount'             => ['required', 'numeric'],
-            'cash_advance'             => ['required', 'numeric'],
-            'remitted_expenses'        => ['required', 'numeric'],
-            'sale_short'               => ['nullable', 'numeric'],
-            'total_cash'               => ['required', 'numeric'],
+            'productList.*.quantity' => ['required', 'numeric', 'min:0.01'],
+            'shift' => ['required', 'string'],
+            'cash_amount' => ['required', 'numeric'],
+            'gcash_amount' => ['required', 'numeric'],
+            'cash_advance' => ['required', 'numeric'],
+            'remitted_expenses' => ['required', 'numeric'],
+            'sale_short' => ['nullable', 'numeric'],
+            'net_cash' => ['required', 'numeric'],
         ]);
 
         $inv = $this->inventoryService->inventoryOut([
-            'branch_id'   => $data['branch_id'],
-            'inventory'   => [],
+            'branch_id' => $data['branch_id'],
+            'inventory' => [],
             'productList' => $data['productList'],
             'sale' => [
-                'shift'             => $data['shift'],
-                'cash_amount'       => $data['cash_amount'],
-                'adv_collection'    => $data['adv_collection'],
-                'gcash_amount'      => $data['gcash_amount'],
-                'cash_advance'      => $data['cash_advance'],
+                'shift' => $data['shift'],
+                'cash_amount' => $data['cash_amount'],
+                'gcash_amount' => $data['gcash_amount'],
+                'cash_advance' => $data['cash_advance'],
                 'remitted_expenses' => $data['remitted_expenses'],
-                'sale_short'        => $data['sale_short'] ?? 0,
-                'total_cash'        => $data['total_cash'],
+                'sale_short' => $data['sale_short'] ?? 0,
+                'net_cash' => $data['net_cash'],
             ],
         ]);
 
-        if (! $inv) {
+        if (!$inv) {
             return back()->with('error', 'Failed to record sale. Check the logs.');
         }
 

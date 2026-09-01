@@ -5,6 +5,7 @@ interface InventoryRow {
     id: number;
     type: string;
     inventory_type: string | null;
+    stock_movement_type: string | null;
     branch: string | null;
     encoder: string | null;
     cash_amount: number | null;
@@ -81,16 +82,16 @@ export default function Index() {
                                     <td className="px-4 py-3">
                                         <span
                                             className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                                                inv.type === 'IN'
+                                                inv.inventory_type === 'IN'
                                                     ? 'bg-green-100 text-green-700'
                                                     : 'bg-red-100 text-red-700'
                                             }`}
                                         >
-                                            {inv.type}
+                                            {inv.inventory_type}
                                         </span>
                                     </td>
                                     <td className="px-4 py-3 text-gray-900">{inv.branch ?? '—'}</td>
-                                    <td className="px-4 py-3 text-gray-700">{inv.inventory_type ?? '—'}</td>
+                                    <td className="px-4 py-3 text-gray-700">{inv.stock_movement_type ?? '—'}</td>
                                     <td className="px-4 py-3 text-gray-700">{inv.encoder ?? '—'}</td>
                                     <td className="px-4 py-3 text-right text-gray-900">
                                         {inv.cash_amount !== null ? `₱${inv.cash_amount}` : '—'}
