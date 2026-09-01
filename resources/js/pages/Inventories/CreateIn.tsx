@@ -104,6 +104,8 @@ export default function CreateIn({ branches, products, stockMovementTypes }: Pro
                                     value={data.stock_movement_type}
                                     onChange={(e) => setData('stock_movement_type', e.target.value)}
                                 >
+                                    <option value="">Select stock movement…</option>
+
                                     {stockMovementTypes.map((t) => (
                                         <option key={t.value} value={t.value}>{t.label}</option>
                                     ))}
