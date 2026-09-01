@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Enums\InOutType;
 use App\Enums\StockMovementType;
+use App\Http\Requests\StoreInInventoryRequest;
+use App\Http\Requests\StoreInventoryRequest;
 use App\Models\Branch;
 use App\Models\Inventory;
 use App\Models\Product;
@@ -60,15 +62,9 @@ class InventoryController extends Controller
         ]);
     }
 
-    public function storeIn(Request $request): RedirectResponse
+    public function storeIn(StoreInInventoryRequest  $request): RedirectResponse
     {
-        $data = $request->validate([
-            'branch_id' => ['required', 'exists:branches,id'],
-            'stock_movement_type' => ['required', new Enum(StockMovementType::class)],
-            'productList' => ['required', 'array', 'max:9999','min:1'],
-            'productList.*.product_id' => ['required', 'exists:products,id'],
-            'productList.*.quantity' => ['required', 'numeric', 'max:9999','min:0.01'],
-        ]);
+        $data = $request->validated();
 
         $inv = $this->inventoryService->inventoryIn([
             'branch_id' => $data['branch_id'],
