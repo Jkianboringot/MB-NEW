@@ -30,12 +30,12 @@ class StoreInInventoryRequest extends FormRequest
                 'required',
                 new Enum(StockMovementType::class),
             ],
-            'productList' => ['required', 'array', 'max:9999', 'min:1'],
+            'productList' => ['required', 'array', 'max:99999', 'min:1'],
             'productList.*.product_id' => ['required', 'exists:products,id'],
             'productList.*.quantity' => [
                 'required',
                 'integer',
-                'max:9999',
+                'max:99999',
                 'min:1',
             ],
         ];

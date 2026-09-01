@@ -28,14 +28,14 @@ class StoreOutInventoryRequest extends FormRequest
             'branch_id' => ['required', 'exists:branches,id'],
             'productList' => ['required', 'array', 'min:1'],
             'productList.*.product_id' => ['required', 'exists:products,id'],
-            'productList.*.quantity' => ['required', 'integer', 'max:9999','min:1'],
+            'productList.*.quantity' => ['required', 'integer', 'max:99999','min:1'],
             'shift' => ['required', new Enum(Shift::class)],
-            'cash_amount' => ['required', 'numeric', 'max:9999','min:0.01'],
-            'gcash_amount' => ['nullable', 'numeric', 'max:9999','min:0.01'],
-            'cash_advance' => ['nullable', 'numeric', 'max:9999','min:0.01'],
-            'remitted_expenses' => ['nullable', 'numeric', 'max:9999','min:0.01'],
-            'cash_shortage' => ['nullable', 'numeric', 'max:9999','min:0.01'],
-            'net_cash' => ['required', 'numeric', 'max:9999','min:0.01'],
+            'cash_amount' => ['required', 'numeric', 'max:99999','min:0.01'],
+            'gcash_amount' => ['nullable', 'numeric', 'max:99999','min:0.01'],
+            'cash_advance' => ['nullable', 'numeric', 'max:99999','min:0.01'],
+            'remitted_expenses' => ['nullable', 'numeric', 'max:99999','min:0.01'],
+            'cash_shortage' => ['nullable', 'numeric', 'max:99999','min:0.01'],
+            'net_cash' => ['required', 'numeric', 'max:99999','min:0.01'],
         ];
     }
 }
