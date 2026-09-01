@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\InOutType;
+use App\Enums\Shift;
 use App\Enums\StockMovementType;
 use App\Http\Requests\StoreInInventoryRequest;
 use App\Http\Requests\StoreInventoryRequest;
@@ -57,6 +58,7 @@ class InventoryController extends Controller
     public function createIn(): Response
     {
         return Inertia::render('Inventories/CreateIn', [
+
             'stockMovementTypes' => collect(StockMovementType::cases())->map(fn($cases) => ['value' => $cases->value, 'label' => Str::headline($cases->name)]),
             'branches' => Branch::select('id', 'location', 'branch_type')->get(),
             'products' => Product::select('id', 'name', 'price')->get(),
@@ -70,10 +72,8 @@ class InventoryController extends Controller
         $inv = $this->inventoryService->inventoryIn([
             'branch_id' => $data['branch_id'],
             'inventory' => [
-                'inventory_type' => InOutType::In,
                 'stock_movement_type' => $data['stock_movement_type'],
 
-                'encoder_id' => auth()->id(),
             ],
             'productList' => $data['productList'],
         ]);
@@ -105,7 +105,9 @@ class InventoryController extends Controller
         ]);
 
         return Inertia::render('Inventories/CreateOut', [
-            'stockMovementType' => collect(StockMovementType::cases())->map(fn($cases) => ['value' => $cases->value, 'label' => Str::headline($cases->name)]),
+            'shifts' => collect(Shift::cases())->map(fn($cases) => ['value' => $cases->value, 'label' => Str::headline($cases->name)]),
+
+            'stockMovementTypes' => collect(StockMovementType::cases())->map(fn($cases) => ['value' => $cases->value, 'label' => Str::headline($cases->name)]),
 
             'branches' => $branches,
         ]);
@@ -118,7 +120,10 @@ class InventoryController extends Controller
 
         $inv = $this->inventoryService->inventoryOut([
             'branch_id' => $data['branch_id'],
-            'inventory' => [],
+            'inventory' => [
+                'stock_movement_type' => $data['stock_movement_type'],
+
+            ],
             'productList' => $data['productList'],
             'sale' => [
                 'shift' => $data['shift'],

@@ -98,7 +98,7 @@ export default function CreateIn({ branches, products, stockMovementTypes }: Pro
                             </div>
 
                             <div>
-                                <label className={labelClass}>Type</label>
+                                <label className={labelClass}>Stock Type</label>
                                 <select
                                     className={inputClass}
                                     value={data.stock_movement_type}

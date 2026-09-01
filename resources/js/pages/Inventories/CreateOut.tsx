@@ -19,19 +19,31 @@ interface ProductRow {
     quantity: number;
 }
 
+
+interface SelectOption {
+    value: string;
+    label: string;
+}
+
 interface Props {
     branches: Branch[];
+    stockMovementTypes: SelectOption[];
+    shifts: SelectOption[];
 }
+
 
 const inputClass =
     'block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:bg-gray-50 disabled:text-gray-400';
 const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700';
 
-export default function CreateOut({ branches }: Props) {
+export default function CreateOut({ branches, stockMovementTypes, shifts }: Props) {
+    // HACK - the shift,and stockMvomentType needs to be the data type but i will skip it for now, becuase
+    // backend return value , label in the future make it directly check from enum
     const { data, setData, post, processing, errors } = useForm<{
         branch_id: number | '';
         productList: ProductRow[];
         shift: string;
+        stock_movement_type: string;
         cash_amount: number;
         sale_short: number;
         gcash_amount: number;
@@ -42,6 +54,7 @@ export default function CreateOut({ branches }: Props) {
         branch_id: '',
         productList: [{ product_id: '', quantity: 1 }],
         shift: '',
+        stock_movement_type: '',
         cash_amount: 0,
         sale_short: 0,
         gcash_amount: 0,
@@ -222,19 +235,37 @@ export default function CreateOut({ branches }: Props) {
                     <div className="p-6">
                         <h2 className="mb-4 text-sm font-semibold text-gray-900">Cash Summary</h2>
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <div className="sm:col-span-2">
+                            <div >
                                 <label className={labelClass}>Shift</label>
                                 <select
                                     className={`${inputClass} sm:max-w-xs`}
                                     value={data.shift}
                                     onChange={(e) => setData('shift', e.target.value)}
                                 >
-                                    <option value="">Select shift…</option>
-                                    <option value="opening">Opening</option>
-                                    <option value="closing">Closing</option>
+
+                                {shifts.map((v) => (
+                                        <option key={v.value} value={v.value}>{v.label}</option>
+                                    ))}
                                 </select>
                                 {errors.shift && <p className="mt-1.5 text-sm text-red-600">{errors.shift}</p>}
                             </div>
+
+                            <div >
+                                <label className={labelClass}>Stock Type</label>
+                                <select
+                                    className={`${inputClass} sm:max-w-xs`}
+
+                                    value={data.stock_movement_type}
+                                    onChange={(e) => setData('stock_movement_type', e.target.value)}
+                                >
+                                    {stockMovementTypes.map((t) => (
+                                        <option key={t.value} value={t.value}>{t.label}</option>
+                                    ))}
+                                </select>
+                                {errors.stock_movement_type && <p className="mt-1.5 text-sm text-red-600">{errors.stock_movement_type}</p>}
+                            </div>
+
+
 
                             <MoneyField label="Cash on Hand" value={data.cash_amount} onChange={(v) => setData('cash_amount', v)} error={errors.cash_amount} />
                             <MoneyField label="Cash Shortage" value={data.sale_short} onChange={(v) => setData('sale_short', v)} error={errors.sale_short} />

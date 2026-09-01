@@ -51,14 +51,14 @@ class InventoryService
     
                     // TEST if this fail it should not run the foreact
                     $branch = Branch::findOrFail($data['branch_id']);
-
+                    
                     $inv = new Inventory();
-
                     $inv->fill($data['inventory']);
 
-                    $inv->branch_id = $data['branch_id'];
-
-
+                    $inv->encoder_id = auth()->id();
+                    $inv->inventory_type = InOutType::In->value;
+                    $inv->branch_id = $branch->id; //ensure only insert if it exist, instead fo data[branch_id] which has possiblity of not existing
+    
                     $inv->save();
 
                     // we need for each because we will have collection of product
@@ -170,7 +170,7 @@ class InventoryService
 
         try {
 
-          return   DB::transaction(
+            return DB::transaction(
                 function () use ($data) {
 
                     //FAULT-TOLERANCE sicne this is here we might as will use it to check, if i fail whole thing should stop
@@ -184,7 +184,7 @@ class InventoryService
                     $inv->inventory_type = InOutType::Out->value;
                     $inv->branch_id = $branch->id; //ensure only insert if it exist, instead fo data[branch_id] which has possiblity of not existing
                     $inv->save();
-                    
+
                     $sale = new Sale();
                     $sale->fill($data['sale']);
 
@@ -212,7 +212,7 @@ class InventoryService
                             );
 
                         } else {
-                        dd($existting,'bad');
+                            dd($existting, 'bad');
 
                             //we need to throw error here since , in here we expect that an product already exist in this branch
                             //if not then something is wrong, we should'nt even be able to make this request
