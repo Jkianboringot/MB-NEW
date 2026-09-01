@@ -14,6 +14,9 @@ interface Product {
     price: number;
 }
 
+
+
+
 interface ProductRow {
     product_id: number | '';
     quantity: number;
@@ -22,6 +25,7 @@ interface ProductRow {
 interface Props {
     branches: Branch[];
     products: Product[];
+    stockMovementTypes: { value: string; label: string }[];
 }
 
 // Shared tokens — reuse these two strings on every field across the app
@@ -30,14 +34,15 @@ const inputClass =
     'block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:bg-gray-50 disabled:text-gray-400';
 const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700';
 
-export default function CreateIn({ branches, products }: Props) {
+export default function CreateIn({ branches, products, stockMovementTypes }: Props) {
     const { data, setData, post, processing, errors } = useForm<{
         branch_id: number | '';
-        inventory_type: string;
+        stock_movement_type: string;
         productList: ProductRow[];
     }>({
         branch_id: '',
-        inventory_type: 'delivery',
+        stock_movement_type: 'delivery',
+
         productList: [{ product_id: '', quantity: 1 }],
     });
 
@@ -96,12 +101,12 @@ export default function CreateIn({ branches, products }: Props) {
                                 <label className={labelClass}>Type</label>
                                 <select
                                     className={inputClass}
-                                    value={data.inventory_type}
-                                    onChange={(e) => setData('inventory_type', e.target.value)}
+                                    value={data.stock_movement_type}
+                                    onChange={(e) => setData('stock_movement_type', e.target.value)}
                                 >
-                                    <option value="delivery">Delivery</option>
-                                    <option value="transfer">Branch Transfer</option>
-                                    <option value="return">Return</option>
+                                    {stockMovementTypes.map((t) => (
+                                        <option key={t.value} value={t.value}>{t.label}</option>
+                                    ))}
                                 </select>
                             </div>
                         </div>
