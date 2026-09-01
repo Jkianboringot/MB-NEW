@@ -243,7 +243,10 @@ export default function CreateOut({ branches, stockMovementTypes, shifts }: Prop
                                     onChange={(e) => setData('shift', e.target.value)}
                                 >
 
+                                    <option value="">Select shift…</option>
+
                                 {shifts.map((v) => (
+                                    
                                         <option key={v.value} value={v.value}>{v.label}</option>
                                     ))}
                                 </select>
@@ -258,6 +261,8 @@ export default function CreateOut({ branches, stockMovementTypes, shifts }: Prop
                                     value={data.stock_movement_type}
                                     onChange={(e) => setData('stock_movement_type', e.target.value)}
                                 >
+                                    <option value="">Select stock movement…</option>
+
                                     {stockMovementTypes.map((t) => (
                                         <option key={t.value} value={t.value}>{t.label}</option>
                                     ))}
