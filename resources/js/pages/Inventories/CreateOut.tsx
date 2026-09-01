@@ -45,7 +45,7 @@ export default function CreateOut({ branches, stockMovementTypes, shifts }: Prop
         shift: string;
         stock_movement_type: string;
         cash_amount: number;
-        sale_short: number;
+        cash_shortage: number;
         gcash_amount: number;
         cash_advance: number;
         remitted_expenses: number;
@@ -56,7 +56,7 @@ export default function CreateOut({ branches, stockMovementTypes, shifts }: Prop
         shift: '',
         stock_movement_type: '',
         cash_amount: 0,
-        sale_short: 0,
+        cash_shortage: 0,
         gcash_amount: 0,
         cash_advance: 0,
         remitted_expenses: 0,
@@ -74,9 +74,9 @@ export default function CreateOut({ branches, stockMovementTypes, shifts }: Prop
             Number(data.gcash_amount) +
             Number(data.cash_advance) +
             Number(data.remitted_expenses) -
-            Number(data.sale_short)
+            Number(data.cash_shortage)
         );
-    }, [data.cash_amount, data.gcash_amount, data.cash_advance, data.remitted_expenses, data.sale_short]);
+    }, [data.cash_amount, data.gcash_amount, data.cash_advance, data.remitted_expenses, data.cash_shortage]);
 
     function handleBranchChange(branchId: number) {
         setData((prev) => ({
@@ -273,7 +273,7 @@ export default function CreateOut({ branches, stockMovementTypes, shifts }: Prop
 
 
                             <MoneyField label="Cash on Hand" value={data.cash_amount} onChange={(v) => setData('cash_amount', v)} error={errors.cash_amount} />
-                            <MoneyField label="Cash Shortage" value={data.sale_short} onChange={(v) => setData('sale_short', v)} error={errors.sale_short} />
+                            <MoneyField label="Cash Shortage" value={data.cash_shortage} onChange={(v) => setData('cash_shortage', v)} error={errors.cash_shortage} />
                             <MoneyField label="Gcash" value={data.gcash_amount} onChange={(v) => setData('gcash_amount', v)} error={errors.gcash_amount} />
                             <MoneyField label="Cash Advance" value={data.cash_advance} onChange={(v) => setData('cash_advance', v)} error={errors.cash_advance} />
                             <MoneyField label="Remitted Expenses" value={data.remitted_expenses} onChange={(v) => setData('remitted_expenses', v)} error={errors.remitted_expenses} />

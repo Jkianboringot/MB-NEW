@@ -131,7 +131,7 @@ class InventoryController extends Controller
                 'gcash_amount' => $data['gcash_amount'],
                 'cash_advance' => $data['cash_advance'],
                 'remitted_expenses' => $data['remitted_expenses'],
-                'sale_short' => $data['sale_short'] ?? 0,
+                'cash_shortage' => $data['cash_shortage'] ?? 0,
                 'net_cash' => $data['net_cash'],
             ],
         ]);
