@@ -18,6 +18,8 @@ return new class extends Migration
             $table->decimal('price')->unsigned()->default(0);
             $table->index('name','products_name_index');
             $table->string('category')->nullable();
+            $table->decimal('cost')->unsigned()->default(0);
+
             // btw this is not good practice am only doing it becuase am a solo dev , but never ever do this on production
             //this is development
             $table->timestamps();

@@ -1,42 +1,45 @@
-import { Head, Link, router, useForm } from '@inertiajs/react';
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
+import { Head, useForm } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { store } from '@/routes/products';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircleIcon } from 'lucide-react';
 import { CircleAlert } from 'lucide-react';
-// import { branch } from '@/routes';
+import { store } from '@/routes/products';
 
 export default function Create() {
-
     const { data, setData, post, processing, errors } = useForm({
         name: '',
         price: '',
-        description: '',
-    })
+        cost: '',
+    });
 
     const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault() //this prevent reloads of whole page
-        console.log(e)
-        post(store().url); // this must match the route name 'products.store' exactly
-    }
+        e.preventDefault();
+        post(store().url);
+    };
 
     return (
         <>
             <Head title="Create New Product" />
-            <div className='w-8/12 p-4'>
-                <form onSubmit={handleSubmit} className='space-y-4'>
-                    {/* display error */}
 
+            <div className="mx-auto w-full  max-w-4xl p-6">
+                <div className="mb-4">
+                    <h1 className=" text-2xl font-bold text-ink">New Product</h1>
+                    <p className="mt-0.5 text-sm text-subtle">
+                        Add a product to your catalog.
+                    </p>
+                </div>
+
+                <form
+                    onSubmit={handleSubmit}
+                    className="space-y-4 rounded-xl border border-[#f0ddc8] bg-white p-5"
+                >
                     {Object.keys(errors).length > 0 && (
                         <Alert variant="destructive">
-                            <CircleAlert/>
-                            <AlertTitle>{'product error'}</AlertTitle>
+                            <CircleAlert />
+                            <AlertTitle>Something's not right</AlertTitle>
                             <AlertDescription>
-                             <ul className="list-inside list-disc text-sm">
+                                <ul className="list-inside list-disc text-sm">
                                     {Object.entries(errors).map(([key, message]) => (
                                         <li key={key}>{message as string}</li>
                                     ))}
@@ -45,22 +48,62 @@ export default function Create() {
                         </Alert>
                     )}
 
-                    <div className='gap-1.5'>
-                        <Label htmlFor='product name'>Name</Label>
-                        <Input placeholder='Product name' value={data.name} onChange={(e) => setData('name', e.target.value)}></Input>
+                    <div className="space-y-1">
+                        <Label htmlFor="name" className="font-semibold text-ink">
+                            Name
+                        </Label>
+                        <Input
+                            id="name"
+                            placeholder="Product name"
+                            value={data.name}
+                            onChange={(e) => setData('name', e.target.value)}
+                            className="border-[#e0d0c0]"
+                        />
                     </div>
 
-                    <div className='gap-1.5'>
-                        <Label htmlFor='product price'>Price</Label>
-                        <Input placeholder='Price' onChange={(e) => setData('price', e.target.value)}></Input>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                            <Label htmlFor="price" className="font-semibold text-ink">
+                                Price
+                            </Label>
+                            <Input
+                                id="price"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                placeholder="0.00"
+                                value={data.price}
+                                onChange={(e) => setData('price', e.target.value)}
+                                className="border-[#e0d0c0]"
+                            />
+                        </div>
+
+                        <div className="space-y-1">
+                            <Label htmlFor="cost" className="font-semibold text-ink">
+                                Cost
+                            </Label>
+                            <Input
+                                id="cost"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                placeholder="0.00"
+                                value={data.cost}
+                                onChange={(e) => setData('cost', e.target.value)}
+                                className="border-[#e0d0c0]"
+                            />
+                        </div>
                     </div>
 
-                    {/* <div className='gap-1.5'>
-                        <Label htmlFor='product description'>Description</Label>
-                        <Textarea placeholder='Description' onChange={(e) => setData('description', e.target.value)}></Textarea>
-                    </div> */}
-
-                    <Button type='submit'>Save</Button>
+                    <div className="flex justify-end border-t border-[#f0ddc8] pt-3">
+                        <Button
+                            type="submit"
+                            disabled={processing}
+                            className="bg-brand-orange font-bold text-white hover:bg-brand-orange-hover disabled:opacity-60"
+                        >
+                            Save Product
+                        </Button>
+                    </div>
                 </form>
             </div>
         </>
@@ -71,7 +114,7 @@ Create.layout = {
     breadcrumbs: [
         {
             title: 'Create New Product',
-            href: '/products/create'
+            href: '/products/create',
         },
     ],
 };

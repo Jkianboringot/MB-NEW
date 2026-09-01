@@ -32,6 +32,11 @@ const mainNavItems: NavItem[] = [
         href: '/inventories',
         icon: House,
     },
+     {
+        title: 'Branch',
+        href: '/branches',
+        icon: House,
+    },
 ];
 
 const footerNavItems: NavItem[] = [

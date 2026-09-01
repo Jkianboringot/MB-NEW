@@ -1,126 +1,233 @@
+import { useMemo, useState } from 'react';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { CircleAlert, Megaphone } from 'lucide-react';
-// import { branch } from '@/routes';
+import {
+    ChevronDown,
+    Megaphone,
+    Pencil,
+    Search,
+    SlidersHorizontal,
+    Trash2,
+} from 'lucide-react';
 import {
     Table,
     TableBody,
-    TableCaption,
     TableCell,
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table"
-
+} from '@/components/ui/table';
 
 interface PageProps {
     flash: {
-        message?: string
-    },
-    products: Product[]
+        message?: string;
+    };
+    products: Product[];
 }
-
-
 
 interface Product {
-    id: number,
-    name: string,
-    price: number,
-
+    id: number;
+    name: string;
+    price: number;
+    cost: number;
 }
 
+type SortKey = 'name' | 'price' | 'cost';
+type SortDirection = 'asc' | 'desc';
 
-export default function Product() {
+function formatCurrency(value: number) {
+    return Number(value).toFixed(2);
+}
+
+export default function Index() {
     const { flash, products } = usePage().props as PageProps;
-    console.log(products)
 
-    // const  handleDelete = useCallback((id:number,name:string) => {
-    //   setList(prev => prev.filter(item => item.id != id))
-    // }, []);
+    const { processing, delete: destroy } = useForm();
 
-    const { processing, delete: destroy, put: put } = useForm()
+    const [search, setSearch] = useState('');
+    const [sortKey, setSortKey] = useState<SortKey>('name');
+    const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
-    const handleDelete = (id: number, name: string) => {
-        if (confirm(`do you want to fuck- ${id}. ${name}`)) {
-            destroy(route('products.delete', id)) //WHY - appreantly this is better than the one below, because route name can change
-            //but by doing it in route we are only calling name so route can hcange but route name cannot
-
-            // TEST do we have to create a test for this destroy like the test would consist of if i change the route will this destroy still
-            // be able to access the uri or do its suppose operation
-
-            // destroy(`/products/${id}`)
+    const toggleSort = (key: SortKey) => {
+        if (sortKey === key) {
+            setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+        } else {
+            setSortKey(key);
+            setSortDirection('asc');
         }
     };
 
+    const visibleProducts = useMemo(() => {
+        const filtered = products.filter((product) =>
+            product.name.toLowerCase().includes(search.toLowerCase()),
+        );
 
+        return filtered.sort((a, b) => {
+            const dir = sortDirection === 'asc' ? 1 : -1;
+            if (sortKey === 'price') {
+                return (a.price - b.price) * dir;
+            }
+            if (sortKey === 'cost') {
+                return (a.cost - b.cost) * dir;
+            }
+            return a.name.localeCompare(b.name) * dir;
+        });
+    }, [products, search, sortKey, sortDirection]);
+
+    const handleDelete = (id: number, name: string) => {
+        if (confirm(`Delete "${name}"? This can't be undone.`)) {
+            destroy(route('products.delete', id));
+        }
+    };
+
+    const sortIcon = (key: SortKey) => (
+        <ChevronDown
+            className={`h-3.5 w-3.5 transition-transform ${
+                sortKey === key && sortDirection === 'desc' ? 'rotate-180' : ''
+            }`}
+        />
+    );
 
     return (
         <>
-            <div className='m-4'>
-                <div>
-                    {flash.message && (
-                        <Alert variant="destructive">
+            <Head title="Products" />
+
+            <div className="p-6">
+                {flash.message && (
+                    <div className="mb-4">
+                        <Alert>
                             <Megaphone />
-                            <AlertTitle>{'NOTIFICATION'}</AlertTitle>
-                            <AlertDescription>
-                                <ul className="list-inside list-disc text-sm">
-                                    {Object.entries(flash).map(([key, message]) => (
-                                        <li key={key}>{message as string}</li>
-                                    ))}
-                                </ul>
-                            </AlertDescription>
+                            <AlertTitle>Notification</AlertTitle>
+                            <AlertDescription>{flash.message}</AlertDescription>
                         </Alert>
-                    )}
+                    </div>
+                )}
+
+                <div className="mb-6 flex items-center justify-between">
+                    <h1 className="text-3xl font-extrabold tracking-tight text-ink">
+                        Products
+                    </h1>
+                    <Link href={'/products/create'}>
+                        <Button className="bg-brand-orange font-bold text-white hover:bg-brand-orange-hover">
+                            New product
+                        </Button>
+                    </Link>
                 </div>
-            </div>
-            <Head title="Product" />
-            <div className='m-4'>
-                <Link href={'/products/create'}>
-                    <Button>Create a Product</Button>
-                </Link>
-            </div>
-            {products.length > 0 && (
-                <div>
+
+                <div className="overflow-hidden rounded-xl border border-[#f0ddc8] bg-[#fdf8f2]">
+                    <div className="flex items-center justify-end gap-3 border-b border-[#f0ddc8] px-5 py-3">
+                        <div className="relative">
+                            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-orange" />
+                            <Input
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder="Search"
+                                className="w-56 border-brand-orange/40 bg-white pl-9 text-sm"
+                            />
+                        </div>
+                        <button
+                            type="button"
+                            className="flex h-9 w-9 items-center justify-center rounded-md border border-brand-orange/40 bg-white text-brand-orange"
+                        >
+                            <SlidersHorizontal className="h-4 w-4" />
+                        </button>
+                    </div>
+
                     <Table>
                         <TableHeader>
-                            {/* <TableHead isRowHeader className="w-[100px]">Invoice</TableHead> */}
-
-
-                            <TableHead>Name</TableHead>
-                            <TableHead>Price</TableHead>
-                            <TableHead>Action</TableHead>
-
+                            <TableRow className="border-b border-[#f0ddc8] bg-[#fbead9] hover:bg-[#fbead9]">
+                                <TableHead>
+                                    <button
+                                        type="button"
+                                        onClick={() => toggleSort('name')}
+                                        className="flex items-center gap-1 font-bold text-brand-orange-hover"
+                                    >
+                                        Name
+                                        {sortIcon('name')}
+                                    </button>
+                                </TableHead>
+                                <TableHead className="text-center">
+                                    <button
+                                        type="button"
+                                        onClick={() => toggleSort('price')}
+                                        className="mx-auto flex items-center gap-1 font-bold text-brand-orange-hover"
+                                    >
+                                        Price
+                                        {sortIcon('price')}
+                                    </button>
+                                </TableHead>
+                                <TableHead className="text-center">
+                                    <button
+                                        type="button"
+                                        onClick={() => toggleSort('cost')}
+                                        className="mx-auto flex items-center gap-1 font-bold text-brand-orange-hover"
+                                    >
+                                        Cost
+                                        {sortIcon('cost')}
+                                    </button>
+                                </TableHead>
+                                <TableHead className="text-right">Action</TableHead>
+                            </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {products.map((product) => (
+                            {visibleProducts.length === 0 && (
                                 <TableRow>
-                                    <TableCell>{product.name}</TableCell>
-                                    <TableCell >{product.price}</TableCell>
-                                    <TableCell >{product.price}</TableCell>
-                                    <TableCell className='text-center space-x-2'>
-                                        <Link href={`/products/${product.id}/edit`}>
-                                            <Button className='bg-slate-600 hover:bg-slate-700'>Edit</Button>
-                                        </Link>
-                                        <Button disabled={processing} onClick={() => handleDelete(product.id, product.name)}>Delete</Button>
+                                    <TableCell colSpan={4} className="py-10 text-center text-sm text-subtle">
+                                        No products found.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                            {visibleProducts.map((product) => (
+                                <TableRow
+                                    key={product.id}
+                                    className="border-b border-[#f0ddc8] last:border-0 hover:bg-[#fbf3e8]"
+                                >
+                                    <TableCell className="font-medium text-[#7a3b12]">
+                                        {product.name}
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        {formatCurrency(product.price)}
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        {formatCurrency(product.cost)}
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex items-center justify-end gap-4">
+                                            <Link
+                                                href={`/products/${product.id}/edit`}
+                                                className="flex items-center gap-1 text-sm font-medium text-ink hover:text-brand-orange"
+                                            >
+                                                <Pencil className="h-4 w-4" />
+                                                Edit
+                                            </Link>
+                                            <button
+                                                type="button"
+                                                disabled={processing}
+                                                onClick={() => handleDelete(product.id, product.name)}
+                                                className="flex items-center gap-1 text-sm font-medium text-ink hover:text-danger disabled:opacity-50"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                                Delete
+                                            </button>
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
-
                     </Table>
                 </div>
-            )}
+            </div>
         </>
     );
 }
 
-Product.layout = {
+Index.layout = {
     breadcrumbs: [
         {
             title: 'Product',
-            href: '/products'
+            href: '/products',
         },
     ],
 };

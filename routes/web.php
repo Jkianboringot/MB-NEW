@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\BranchController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\ProductController;
+use App\Models\Branch;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', 'dashboard')->name('home');
@@ -37,6 +39,29 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->name('store-out');
         }
     );
+
+    Route::prefix('branches')->name('branches.')->group(
+        function () {
+            Route::get('/', [BranchController::class, 'index'])
+                ->name('index');
+
+            Route::get('/{branch}/products', [BranchController::class, 'products'])
+                ->name('products');
+            Route::delete('/{id}', [BranchController::class, 'delete'])->name('delete');
+
+            Route::post('/in', [BranchController::class, 'storeIn'])
+                ->name('store-in');
+
+            Route::get('/create-out', [BranchController::class, 'createOut'])
+                ->name('create-out');
+            Route::post('/out', [BranchController::class, 'storeOut'])
+                ->name('store-out');
+        }
+    );
+
+
+
+
 
 });
 
