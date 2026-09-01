@@ -37,7 +37,7 @@ class InventoryController extends Controller
                 'branch' => $inv->branchs?->location,
                 'encoder' => $inv->encoder?->name,
                 'cash_amount' => $inv->sales?->cash_amount,
-                'total_cash' => $inv->sales?->total_cash,
+                'net_cash' => $inv->sales?->net_cash,
                 'created_at' => $inv->created_at->format('M d, Y g:i A'),
             ]);
 

@@ -9,7 +9,7 @@ interface InventoryRow {
     branch: string | null;
     encoder: string | null;
     cash_amount: number | null;
-    total_cash: number | null;
+    net_cash: number | null;
     created_at: string;
 }
 
@@ -97,7 +97,7 @@ export default function Index() {
                                         {inv.cash_amount !== null ? `₱${inv.cash_amount}` : '—'}
                                     </td>
                                     <td className="px-4 py-3 text-right font-medium text-gray-900">
-                                        {inv.total_cash !== null ? `₱${inv.total_cash}` : '—'}
+                                        {inv.net_cash !== null ? `₱${inv.net_cash}` : '—'}
                                     </td>
                                     <td className="px-4 py-3 text-gray-500">{inv.created_at}</td>
                                 </tr>
