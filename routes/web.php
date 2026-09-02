@@ -60,7 +60,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         }
     );
 
-    Route::prefix('Sale')->name('Sale.')->group(
+    Route::prefix('sales')->name('sales.')->group(
         function () {
             Route::get('/', [SaleController::class, 'index'])
                 ->name('index');
