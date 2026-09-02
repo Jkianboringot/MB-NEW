@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/table';
 import { Megaphone, Search } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { index } from '@/routes/sales';
 
 interface Sale {
     id: number;
@@ -63,7 +64,7 @@ export default function Index() {
     function applySearch(value: string) {
         setSearch(value);
         router.get(
-            route('sales.index'),
+            index().url,
             { search: value },
             { preserveState: true, replace: true },
         );
