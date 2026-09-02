@@ -28,7 +28,7 @@ class SaleController extends Controller
     public function delete(Request $request)
     {
         $request->validate([
-            'id'=>['required','exists:sales,id']
+            'id' => ['required', 'exists:sales,id']
         ]);
 
         Sale::findOrFail($request->id)->deleteOrFail();
@@ -88,7 +88,25 @@ class SaleController extends Controller
 
     public function index()
     {
+        $sale = Sale::with(['branch', 'encoder', 'inventory'])
+            ->latest()
+            ->paginate(15)
+            ->through(fn(Sale $sl) => [
+                'id' => $sl->id,
+                'branch' => $sl->branch?->name,
+                'inventory' => $sl->inventory?->id,
+                'encoder' => $sl->encoder?->name,
+                'cash_amount' => $sl->cash_amount,
+                'shift' => $sl->shift,
+                'cash_advance' => $sl->cash_advance,
+                'cash_shortage' => $sl->cash_shortage,
+                'remitted_expenses' => $sl->remitted_expenses,
+                'gcash_amount' => $sl->gcash_amount,
+                'net_cash' => $sl->net_cash,
+                'created_at' => $sl->created_at->format('M d, Y g:i A'),
+            ]);
 
-        return Inertia::render('Sales/Index', ['sales' => Sale::get()]);
+
+        return Inertia::render('Sales/Index', ['sales' => $sale]);
     }
 }

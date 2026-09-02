@@ -1,15 +1,6 @@
-import { useMemo, useState } from 'react';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 import {
     Table,
     TableBody,
@@ -18,13 +9,11 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Box, Megaphone, Pencil, Search, SlidersHorizontal, Trash2 } from 'lucide-react';
+import { Megaphone, Search } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-// import { products} from '@/routes/sales';
 
 interface Sale {
     id: number;
-    sale: string | null;
     inventory: string | null;
     branch: string;
     shift: string;
@@ -34,8 +23,8 @@ interface Sale {
     cash_amount: number | null;
     gcash_amount: number | null;
     net_cash: number;
+    created_at: string;
 }
-
 
 interface PaginatedSales {
     data: Sale[];
@@ -44,9 +33,9 @@ interface PaginatedSales {
 
 interface PageProps {
     sales: PaginatedSales;
+    filters: { search?: string };
     flash?: { success?: string; error?: string };
 }
-
 
 function SaleBranchBadge({ type }: { type: string }) {
     return (
@@ -65,25 +54,20 @@ function InOutTypeBadge({ type }: { type: string }) {
 }
 
 export default function Index() {
-    // const { sales } = usePage().props as PageProps;
-    const { sales, flash } = usePage<PageProps & Record<string, unknown>>().props as unknown as PageProps;
+    const { sales, filters, flash } = usePage<PageProps & Record<string, unknown>>().props as unknown as PageProps;
+    const [search, setSearch] = useState(filters?.search ?? '');
 
-    const { processing, delete: destroyForm } = useForm();
-
-    const [search, setSearch] = useState('');
-    const [selected, setSelected] = useState<number[]>([]);
-    const [perPage, setPerPage] = useState('10');
-
-    const visibleSales = useMemo(
-        () =>
-            sales.filter((sale) =>
-                sale.shift.toLowerCase().includes(search.toLowerCase()),
-            ),
-        [sales, search],
-    );
-
-
-
+    // Sales are paginated server-side (15/page), so search has to round-trip
+    // to the server too — filtering sales.data client-side would only ever
+    // search whichever 15 rows are on the current page.
+    function applySearch(value: string) {
+        setSearch(value);
+        router.get(
+            route('sales.index'),
+            { search: value },
+            { preserveState: true, replace: true },
+        );
+    }
 
 
     return (
@@ -108,8 +92,16 @@ export default function Index() {
             )}
             <Head title="Sales" />
 
+
             <div className="p-6">
 
+                <div className="mb-6 flex items-center justify-between">
+                    <div>
+                        <h1 className="text-3xl font-extrabold tracking-tight text-ink">Sale</h1>
+                        {/* <p className="mt-1 text-sm text-subtle">Stock movements across all branches.</p> */}
+                    </div>
+
+                </div>
 
                 <div className="overflow-hidden rounded-xl border border-[#f0ddc8] bg-[#fdf8f2]">
                     <div className="flex items-center justify-end gap-3 border-b border-[#f0ddc8] px-5 py-3">
@@ -117,87 +109,49 @@ export default function Index() {
                             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-orange" />
                             <Input
                                 value={search}
-                                onChange={(e) => setSearch(e.target.value)}
+                                onChange={(e) => applySearch(e.target.value)}
                                 placeholder="Search"
                                 className="w-56 border-brand-orange/40 bg-white pl-9 text-sm"
                             />
                         </div>
-
                     </div>
 
                     <Table>
                         <TableHeader>
                             <TableRow className="border-b border-[#f0ddc8] bg-[#fbead9] hover:bg-[#fbead9]">
-
-
-
-
-
-
-                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">
-                                    Inventory
-                                </TableHead>
-                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">
-                                    Branch
-                                </TableHead>
-                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">
-                                    Shift
-                                </TableHead>
-                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">
-                                    Cash Amount
-                                </TableHead>
-                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">
-                                    Gcash Amount
-                                </TableHead>
-                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">
-                                    Cash Advance
-                                </TableHead>
-                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">
-                                    Cash Shortage
-                                </TableHead> <TableHead className="font-bold tracking-wide text-brand-orange-hover">
-                                    Remitted Expenses
-                                </TableHead>
-
-
-                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">
-                                    Net Cash
-                                </TableHead>
-                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">
-                                    Date
-                                </TableHead>
+                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">Inventory</TableHead>
+                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">Branch</TableHead>
+                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">Shift</TableHead>
+                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">Cash Amount</TableHead>
+                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">Gcash Amount</TableHead>
+                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">Cash Advance</TableHead>
+                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">Cash Shortage</TableHead>
+                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">Remitted Expenses</TableHead>
+                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">Net Cash</TableHead>
+                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">Date</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {visibleSales.length === 0 && (
+                            {sales.data.length === 0 && (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="py-10 text-center text-sm text-subtle">
+                                    <TableCell colSpan={10} className="py-10 text-center text-sm text-subtle">
                                         No sales found.
                                     </TableCell>
                                 </TableRow>
                             )}
-                            {visibleSales.map((sale) => (
-                                <TableRow
-                                    key={sale.id}
-                                    className="border-b border-[#f0ddc8] last:border-0 hover:bg-[#fbf3e8]"
-                                >
-
-                                    <TableCell className="font-medium text-[#7a3b12]">
-                                        {sale.inventory}
-                                    </TableCell>
+                            {sales.data.map((sale) => (
+                                <TableRow key={sale.id} className="border-b border-[#f0ddc8] last:border-0 hover:bg-[#fbf3e8]">
+                                    <TableCell className="font-medium text-[#7a3b12]">{sale.inventory}</TableCell>
                                     <TableCell className="font-medium text-[#7a3b12]">
                                         <SaleBranchBadge type={sale.branch} />
-
                                     </TableCell>
                                     <TableCell>
                                         <InOutTypeBadge type={sale.shift} />
-
                                     </TableCell>
                                     <TableCell className="text-right">
-
                                         {sale.cash_amount !== null ? `₱${sale.cash_amount}` : '—'}
                                     </TableCell>
                                     <TableCell className="text-right">
-
                                         {sale.gcash_amount !== null ? `₱${sale.gcash_amount}` : '—'}
                                     </TableCell>
                                     <TableCell className="text-right">
@@ -208,60 +162,31 @@ export default function Index() {
                                     </TableCell>
                                     <TableCell className="text-right">
                                         {sale.remitted_expenses !== null ? `₱${sale.remitted_expenses}` : '—'}
-
                                     </TableCell>
                                     <TableCell className="text-right">
                                         {sale.net_cash !== null ? `₱${sale.net_cash}` : '—'}
-
                                     </TableCell>
-                                    {/* <TableCell>
-                                        <div className="flex items-center justify-end gap-4">
-                                            <Link
-                                                href={products(sale.id).url}
-                                                className="flex items-center gap-1 text-sm font-medium text-ink hover:text-brand-orange"
-                                            >
-                                                <Box className="h-4 w-4" />
-                                                View Products
-                                            </Link>
-                                            <Link
-                                                href={`/sales/${sale.id}/edit`}
-                                                className="flex items-center gap-1 text-sm font-medium text-ink hover:text-brand-orange"
-                                            >
-                                                <Pencil className="h-4 w-4" />
-                                                Edit
-                                            </Link>
-                                            <button
-                                                type="button"
-                                                disabled={processing}
-                                                onClick={() => handleDelete(sale.id, sale.location)}
-                                                className="flex items-center gap-1 text-sm font-medium text-ink hover:text-danger disabled:opacity-50"
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </TableCell> */}
+                                    <TableCell className="text-subtle">{sale.created_at}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                     </Table>
 
-                     {sales.links.length > 3 && (
-                    <div className="flex gap-1 border-t border-[#f0ddc8] px-5 py-3">
-                        {sales.links.map((link, i) => (
-                            <Link
-                                key={i}
-                                href={link.url ?? '#'}
-                                dangerouslySetInnerHTML={{ __html: link.label }}
-                                className={`rounded-md px-3 py-1 text-sm ${
-                                    link.active
+                    {sales.links.length > 3 && (
+                        <div className="flex gap-1 border-t border-[#f0ddc8] px-5 py-3">
+                            {sales.links.map((link, i) => (
+                                <Link
+                                    key={i}
+                                    href={link.url ?? '#'}
+                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                    className={`rounded-md px-3 py-1 text-sm ${link.active
                                         ? 'bg-brand-orange text-white'
                                         : 'text-brand-orange-hover hover:bg-[#fbead9]'
-                                } ${!link.url ? 'pointer-events-none opacity-40' : ''}`}
-                            />
-                        ))}
-                    </div>
-                )}
+                                        } ${!link.url ? 'pointer-events-none opacity-40' : ''}`}
+                                />
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
