@@ -3,6 +3,7 @@
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\SaleController;
 use App\Models\Branch;
 use Illuminate\Support\Facades\Route;
 
@@ -59,6 +60,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         }
     );
 
+    Route::prefix('Sale')->name('Sale.')->group(
+        function () {
+            Route::get('/', [SaleController::class, 'index'])
+                ->name('index');
+
+        }
+    );
 
 
 
