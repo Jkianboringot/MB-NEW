@@ -1,7 +1,9 @@
-import { Link, usePage } from '@inertiajs/react';
+import { useState } from 'react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { ArrowDownCircle, ArrowUpCircle, Megaphone } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, ChevronLeft, ChevronRight, Megaphone, Search } from 'lucide-react';
 import {
     Table,
     TableBody,
@@ -10,7 +12,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { createIn, createOut } from '@/routes/inventories';
+import { createIn, createOut, index as inventoriesIndex } from '@/routes/inventories';
 
 interface InventoryRow {
     id: number;
@@ -31,11 +33,33 @@ interface PaginatedInventories {
 
 interface PageProps {
     inventories: PaginatedInventories;
+    filters: { search?: string };
     flash?: { success?: string; error?: string };
 }
 
+// Laravel's paginator labels are always one of these three shapes —
+// render icons for prev/next instead of trusting raw HTML entities.
+function paginationLabel(label: string) {
+    if (label.includes('Previous')) return <ChevronLeft className="h-4 w-4" />;
+    if (label.includes('Next')) return <ChevronRight className="h-4 w-4" />;
+    return label;
+}
+
 export default function Index() {
-    const { inventories, flash } = usePage<PageProps & Record<string, unknown>>().props as unknown as PageProps;
+    const { inventories, filters, flash } = usePage<PageProps & Record<string, unknown>>().props as unknown as PageProps;
+    const [search, setSearch] = useState(filters?.search ?? '');
+
+    // Inventories are paginated server-side, so search has to round-trip
+    // to the server too — client-side filtering would only ever search
+    // whichever rows are on the current page.
+    function applySearch(value: string) {
+        setSearch(value);
+        router.get(
+            inventoriesIndex().url,
+            { search: value },
+            { preserveState: true, replace: true },
+        );
+    }
 
     return (
         <div className="p-6">
@@ -61,7 +85,6 @@ export default function Index() {
             <div className="mb-6 flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-extrabold tracking-tight text-ink">Inventories</h1>
-                    {/* <p className="mt-1 text-sm text-subtle">Stock movements across all branches.</p> */}
                 </div>
                 <div className="flex gap-2">
                     <Link href={createIn().url}>
@@ -71,7 +94,6 @@ export default function Index() {
                         </Button>
                     </Link>
                     <Link href={createOut().url}>
-
                         <Button className="bg-red-600 font-bold text-white hover:bg-red-700">
                             <ArrowUpCircle className="h-4 w-4" />
                             OUT
@@ -81,6 +103,18 @@ export default function Index() {
             </div>
 
             <div className="overflow-hidden rounded-xl border border-[#f0ddc8] bg-[#fdf8f2]">
+                <div className="flex items-center justify-end gap-3 border-b border-[#f0ddc8] px-5 py-3">
+                    <div className="relative">
+                        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-orange" />
+                        <Input
+                            value={search}
+                            onChange={(e) => applySearch(e.target.value)}
+                            placeholder="Search"
+                            className="w-56 border-brand-orange/40 bg-white pl-9 text-sm"
+                        />
+                    </div>
+                </div>
+
                 <Table>
                     <TableHeader>
                         <TableRow className="border-b border-[#f0ddc8] bg-[#fbead9] hover:bg-[#fbead9]">
@@ -134,20 +168,20 @@ export default function Index() {
                     </TableBody>
                 </Table>
 
-{/* SECURITY - the dangerouslySetInnerHTML is bad becuase it does not stop xxs, remove that and change it to something else*/}
                 {inventories.links.length > 3 && (
                     <div className="flex gap-1 border-t border-[#f0ddc8] px-5 py-3">
                         {inventories.links.map((link, i) => (
                             <Link
                                 key={i}
                                 href={link.url ?? '#'}
-                                dangerouslySetInnerHTML={{ __html: link.label }}
-                                className={`rounded-md px-3 py-1 text-sm ${
+                                className={`flex items-center rounded-md px-3 py-1 text-sm ${
                                     link.active
                                         ? 'bg-brand-orange text-white'
                                         : 'text-brand-orange-hover hover:bg-[#fbead9]'
                                 } ${!link.url ? 'pointer-events-none opacity-40' : ''}`}
-                            />
+                            >
+                                {paginationLabel(link.label)}
+                            </Link>
                         ))}
                     </div>
                 )}
