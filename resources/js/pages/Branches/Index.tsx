@@ -46,7 +46,6 @@ export default function Index() {
     const { processing, delete: destroyForm } = useForm();
 
     const [search, setSearch] = useState('');
-    const [selected, setSelected] = useState<number[]>([]);
     const [perPage, setPerPage] = useState('10');
 
     const visibleBranches = useMemo(
@@ -57,11 +56,7 @@ export default function Index() {
         [branches, search],
     );
 
-    const toggleSelected = (id: number) => {
-        setSelected((prev) =>
-            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-        );
-    };
+     
 
     const handleDelete = (id: number, location: string) => {
         if (confirm(`Delete "${location}"? This can't be undone.`)) {
@@ -96,32 +91,13 @@ export default function Index() {
                                 className="w-56 border-brand-orange/40 bg-white pl-9 text-sm"
                             />
                         </div>
-                        <button
-                            type="button"
-                            className="flex h-9 w-9 items-center justify-center rounded-md border border-brand-orange/40 bg-white text-brand-orange"
-                        >
-                            <SlidersHorizontal className="h-4 w-4" />
-                        </button>
+                     
                     </div>
 
                     <Table>
                         <TableHeader>
                             <TableRow className="border-b border-[#f0ddc8] bg-[#fbead9] hover:bg-[#fbead9]">
-                                <TableHead className="w-10">
-                                    <Checkbox
-                                        checked={
-                                            selected.length === visibleBranches.length &&
-                                            visibleBranches.length > 0
-                                        }
-                                        onCheckedChange={(checked) =>
-                                            setSelected(
-                                                checked
-                                                    ? visibleBranches.map((b) => b.id)
-                                                    : [],
-                                            )
-                                        }
-                                    />
-                                </TableHead>
+                               
                                 <TableHead className="font-bold tracking-wide text-brand-orange-hover">
                                     LOCATION
                                 </TableHead>
@@ -147,12 +123,7 @@ export default function Index() {
                                     key={branch.id}
                                     className="border-b border-[#f0ddc8] last:border-0 hover:bg-[#fbf3e8]"
                                 >
-                                    <TableCell>
-                                        <Checkbox
-                                            checked={selected.includes(branch.id)}
-                                            onCheckedChange={() => toggleSelected(branch.id)}
-                                        />
-                                    </TableCell>
+                                  
                                     <TableCell className="font-medium text-[#7a3b12]">
                                         {branch.location}
                                     </TableCell>
