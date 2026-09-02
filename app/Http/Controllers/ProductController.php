@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SearchRequest;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -83,19 +84,20 @@ class ProductController extends Controller
 
     // }
 
-   public function index(Request $request)
-{
-    $products = Product::query()
-        ->when($request->string('search')->trim(), function ($query, $search) {
-            $query->where('name', 'like', "%{$search}%");
-        })
-        ->orderBy('name')
-        ->paginate(15)
-        ->withQueryString();
+    public function index(SearchRequest $request)
+    {
+        $request->validated();
+        $products = Product::query()
+            ->when($request->string('search')->trim(), function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%");
+            })
+            ->orderBy('name')
+            ->paginate(15)
+            ->withQueryString();
 
-    return Inertia::render('Products/Index', [
-        'products' => $products,
-        'filters' => $request->only(['search']),
-    ]);
-}
+        return Inertia::render('Products/Index', [
+            'products' => $products,
+            'filters' => $request->only(['search']),
+        ]);
+    }
 }

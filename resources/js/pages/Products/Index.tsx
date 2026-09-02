@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -57,18 +57,27 @@ export default function Index() {
     const { flash, products, filters } = usePage<PageProps & Record<string, unknown>>().props as unknown as PageProps;
     const { processing, delete: destroyForm } = useForm();
     const [search, setSearch] = useState(filters?.search ?? '');
+    const isFirstRender = useRef(true);
 
-    // Products are paginated server-side, so search round-trips to the
-    // server — client-side filtering would only ever touch whichever
-    // rows are on the current page.
-    function applySearch(value: string) {
-        setSearch(value);
-        router.get(
-            productsIndex().url,
-            { search: value },
-            { preserveState: true, replace: true },
-        );
-    }
+    // Debounced: typing only updates local state immediately. The actual
+    // request to the server waits until 400ms after the user stops typing,
+    // so it doesn't fire on every keystroke — only once they pause.
+    useEffect(() => {
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
+
+        const timeout = setTimeout(() => {
+            router.get(
+                productsIndex().url,
+                { search },
+                { preserveState: true, replace: true },
+            );
+        }, 400);
+
+        return () => clearTimeout(timeout);
+    }, [search]);
 
     const handleDelete = (id: number, name: string) => {
         if (confirm(`Delete "${name}"? This can't be undone.`)) {
@@ -104,14 +113,21 @@ export default function Index() {
 
                 <div className="overflow-hidden rounded-xl border border-[#f0ddc8] bg-[#fdf8f2]">
                     <div className="flex items-center justify-end gap-3 border-b border-[#f0ddc8] px-5 py-3">
-                        <div className="relative">
+                         <div className="relative">
                             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-orange" />
                             <Input
                                 value={search}
-                                onChange={(e) => applySearch(e.target.value)}
+                                onChange={(e) => setSearch(e.target.value)}
                                 placeholder="Search"
+                                maxLength={100}
                                 className="w-56 border-brand-orange/40 bg-white pl-9 text-sm"
                             />
+                            {search.length >= 100 && (
+                                
+                                <p className="absolute left-0 top-full mb-10 text-xs text-danger">
+                                    Search can't be longer than 5 characters.
+                                </p>
+                            )}
                         </div>
                     </div>
 

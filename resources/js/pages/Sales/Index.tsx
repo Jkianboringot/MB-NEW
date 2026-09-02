@@ -126,15 +126,15 @@ export default function Index() {
                     <Table>
                         <TableHeader>
                             <TableRow className="border-b border-[#f0ddc8] bg-[#fbead9] hover:bg-[#fbead9]">
-                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">Inventory</TableHead>
+                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">Inventory#</TableHead>
                                 <TableHead className="font-bold tracking-wide text-brand-orange-hover">Branch</TableHead>
                                 <TableHead className="font-bold tracking-wide text-brand-orange-hover">Shift</TableHead>
-                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">Cash Amount</TableHead>
+                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">Cash on Hand</TableHead>
                                 <TableHead className="font-bold tracking-wide text-brand-orange-hover">Gcash Amount</TableHead>
                                 <TableHead className="font-bold tracking-wide text-brand-orange-hover">Cash Advance</TableHead>
                                 <TableHead className="font-bold tracking-wide text-brand-orange-hover">Cash Shortage</TableHead>
-                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">Remitted Expenses</TableHead>
-                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">Net Cash</TableHead>
+                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">Remitted</TableHead>
+                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">Total Cash</TableHead>
                                 <TableHead className="font-bold tracking-wide text-brand-orange-hover">Date</TableHead>
                             </TableRow>
                         </TableHeader>
