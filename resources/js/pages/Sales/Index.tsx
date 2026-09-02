@@ -9,7 +9,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Megaphone, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Megaphone, Search } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { index } from '@/routes/sales';
 
@@ -52,6 +52,12 @@ function InOutTypeBadge({ type }: { type: string }) {
             {type}
         </span>
     );
+}
+
+function paginationLabel(label: string) {
+    if (label.includes('Previous')) return <ChevronLeft className="h-4 w-4" />;
+    if (label.includes('Next')) return <ChevronRight className="h-4 w-4" />;
+    return label;
 }
 
 export default function Index() {
@@ -179,12 +185,13 @@ export default function Index() {
                                 <Link
                                     key={i}
                                     href={link.url ?? '#'}
-                                    dangerouslySetInnerHTML={{ __html: link.label }}
-                                    className={`rounded-md px-3 py-1 text-sm ${link.active
-                                        ? 'bg-brand-orange text-white'
-                                        : 'text-brand-orange-hover hover:bg-[#fbead9]'
+                                    className={`flex items-center rounded-md px-3 py-1 text-sm ${link.active
+                                            ? 'bg-brand-orange text-white'
+                                            : 'text-brand-orange-hover hover:bg-[#fbead9]'
                                         } ${!link.url ? 'pointer-events-none opacity-40' : ''}`}
-                                />
+                                >
+                                    {paginationLabel(link.label)}
+                                </Link>
                             ))}
                         </div>
                     )}
