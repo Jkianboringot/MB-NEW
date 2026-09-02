@@ -84,20 +84,29 @@ class BranchController extends Controller
     // }
 // BranchController.php
     public function products(Branch $branch)
+    {
+        $products = $branch->products()
+            ->orderBy('name')
+            ->paginate(15)
+            ->withQueryString();
+
+        return Inertia::render('Branches/BranchProducts', [
+            'branch' => $branch->only('id', 'location'),
+            'products' => $products,
+        ]);
+    }
+public function index(Request $request)
 {
-    $products = $branch->products()
-        ->orderBy('name')
+    $branches = Branch::withCount('products')
+        ->when($request->string('search')->trim(), function ($query, $search) {
+            $query->where('location', 'like', "%{$search}%");
+        })
         ->paginate(15)
         ->withQueryString();
 
-    return Inertia::render('Branches/BranchProducts', [
-        'branch' => $branch->only('id', 'location'),
-        'products' => $products,
+    return Inertia::render('Branches/Index', [
+        'branches' => $branches,
+        'filters' => $request->only(['search']),
     ]);
 }
-    public function index()
-    {
-
-        return Inertia::render('Branches/Index', ['branches' => Branch::get()]);
-    }
 }

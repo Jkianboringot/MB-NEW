@@ -1,15 +1,7 @@
-import { useMemo, useState } from 'react';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { useState } from 'react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 import {
     Table,
     TableBody,
@@ -18,8 +10,8 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Box, Pencil, Search, SlidersHorizontal, Trash2 } from 'lucide-react';
-import { products,deleteMethod } from '@/routes/branches';
+import { Box, ChevronLeft, ChevronRight, Pencil, Search, Trash2 } from 'lucide-react';
+import { deleteMethod, index as branchesIndex, products } from '@/routes/branches';
 
 interface Branch {
     id: number;
@@ -28,8 +20,14 @@ interface Branch {
     products_count: number;
 }
 
+interface PaginatedBranches {
+    data: Branch[];
+    links: { url: string | null; label: string; active: boolean }[];
+}
+
 interface PageProps {
-    branches: Branch[];
+    branches: PaginatedBranches;
+    filters: { search?: string };
 }
 
 function BranchTypeBadge({ type }: { type: string }) {
@@ -40,23 +38,30 @@ function BranchTypeBadge({ type }: { type: string }) {
     );
 }
 
+// Laravel's paginator labels are always one of these three shapes —
+// render icons for prev/next instead of trusting raw HTML entities.
+function paginationLabel(label: string) {
+    if (label.includes('Previous')) return <ChevronLeft className="h-4 w-4" />;
+    if (label.includes('Next')) return <ChevronRight className="h-4 w-4" />;
+    return label;
+}
+
 export default function Index() {
-    const { branches } = usePage().props as PageProps;
-
+    const { branches, filters } = usePage<PageProps & Record<string, unknown>>().props as unknown as PageProps;
     const { processing, delete: destroyForm } = useForm();
+    const [search, setSearch] = useState(filters?.search ?? '');
 
-    const [search, setSearch] = useState('');
-    const [perPage, setPerPage] = useState('10');
-
-    const visibleBranches = useMemo(
-        () =>
-            branches.filter((branch) =>
-                branch.location.toLowerCase().includes(search.toLowerCase()),
-            ),
-        [branches, search],
-    );
-
-     
+    // Branches are paginated server-side, so search has to round-trip to
+    // the server — client-side filtering would only ever touch whichever
+    // rows are on the current page.
+    function applySearch(value: string) {
+        setSearch(value);
+        router.get(
+            branchesIndex().url,
+            { search: value },
+            { preserveState: true, replace: true },
+        );
+    }
 
     const handleDelete = (id: number, location: string) => {
         if (confirm(`Delete "${location}"? This can't be undone.`)) {
@@ -86,18 +91,16 @@ export default function Index() {
                             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-orange" />
                             <Input
                                 value={search}
-                                onChange={(e) => setSearch(e.target.value)}
+                                onChange={(e) => applySearch(e.target.value)}
                                 placeholder="Search"
                                 className="w-56 border-brand-orange/40 bg-white pl-9 text-sm"
                             />
                         </div>
-                     
                     </div>
 
                     <Table>
                         <TableHeader>
                             <TableRow className="border-b border-[#f0ddc8] bg-[#fbead9] hover:bg-[#fbead9]">
-                               
                                 <TableHead className="font-bold tracking-wide text-brand-orange-hover">
                                     LOCATION
                                 </TableHead>
@@ -111,19 +114,18 @@ export default function Index() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {visibleBranches.length === 0 && (
+                            {branches.data.length === 0 && (
                                 <TableRow>
                                     <TableCell colSpan={5} className="py-10 text-center text-sm text-subtle">
                                         No branches found.
                                     </TableCell>
                                 </TableRow>
                             )}
-                            {visibleBranches.map((branch) => (
+                            {branches.data.map((branch) => (
                                 <TableRow
                                     key={branch.id}
                                     className="border-b border-[#f0ddc8] last:border-0 hover:bg-[#fbf3e8]"
                                 >
-                                  
                                     <TableCell className="font-medium text-[#7a3b12]">
                                         {branch.location}
                                     </TableCell>
@@ -163,24 +165,23 @@ export default function Index() {
                         </TableBody>
                     </Table>
 
-                    <div className="flex items-center justify-between px-5 py-3 text-sm text-brand-orange">
-                        <span>
-                            Showing 1 to {visibleBranches.length} of {branches.length} results
-                        </span>
-                        <div className="flex items-center gap-2">
-                            <span className="text-subtle">Per page</span>
-                            <Select value={perPage} onValueChange={setPerPage}>
-                                <SelectTrigger className="w-20 border-brand-orange/40 bg-white">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="10">10</SelectItem>
-                                    <SelectItem value="25">25</SelectItem>
-                                    <SelectItem value="50">50</SelectItem>
-                                </SelectContent>
-                            </Select>
+                    {branches.links.length > 3 && (
+                        <div className="flex gap-1 border-t border-[#f0ddc8] px-5 py-3">
+                            {branches.links.map((link, i) => (
+                                <Link
+                                    key={i}
+                                    href={link.url ?? '#'}
+                                    className={`flex items-center rounded-md px-3 py-1 text-sm ${
+                                        link.active
+                                            ? 'bg-brand-orange text-white'
+                                            : 'text-brand-orange-hover hover:bg-[#fbead9]'
+                                    } ${!link.url ? 'pointer-events-none opacity-40' : ''}`}
+                                >
+                                    {paginationLabel(link.label)}
+                                </Link>
+                            ))}
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
         </>
