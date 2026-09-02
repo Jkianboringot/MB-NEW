@@ -16,6 +16,7 @@ import { deleteMethod, index as branchesIndex, products, edit } from '@/routes/b
 interface Branch {
     id: number;
     location: string;
+    name: string;
     branch_type: string;
     products_count: number;
 }
@@ -101,6 +102,9 @@ export default function Index() {
                     <Table>
                         <TableHeader>
                             <TableRow className="border-b border-[#f0ddc8] bg-[#fbead9] hover:bg-[#fbead9]">
+                                 <TableHead className="font-bold tracking-wide text-brand-orange-hover">
+                                    Name
+                                </TableHead>
                                 <TableHead className="font-bold tracking-wide text-brand-orange-hover">
                                     LOCATION
                                 </TableHead>
@@ -126,6 +130,9 @@ export default function Index() {
                                     key={branch.id}
                                     className="border-b border-[#f0ddc8] last:border-0 hover:bg-[#fbf3e8]"
                                 >
+                                     <TableCell className="font-medium text-[#7a3b12]">
+                                        {branch.name}
+                                    </TableCell>
                                     <TableCell className="font-medium text-[#7a3b12]">
                                         {branch.location}
                                     </TableCell>

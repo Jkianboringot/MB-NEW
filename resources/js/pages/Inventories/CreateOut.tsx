@@ -47,6 +47,8 @@ export default function CreateOut({ branches, stockMovementTypes, shifts }: Prop
     const { data, setData, post, processing, errors } = useForm<{
         branch_id: number | '';
         productList: ProductRow[];
+
+        // HACK - shift needs to be enum not just String, same with stock_movement
         shift: string;
         stock_movement_type: string;
         cash_amount: number;
