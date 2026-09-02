@@ -74,6 +74,8 @@ export default function Edit({ products }: Props) {
                             onChange={(e) => setData('name', e.target.value)}
                             className="border-[#e0d0c0]"
                         />
+                        {errors.name && <p className="mt-1.5 text-sm text-danger">{errors.name}</p>}
+
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
@@ -91,6 +93,8 @@ export default function Edit({ products }: Props) {
                                 onChange={(e) => setData('price', e.target.value)}
                                 className="border-[#e0d0c0]"
                             />
+                        {errors.price && <p className="mt-1.5 text-sm text-danger">{errors.price}</p>}
+
                         </div>
 
                         <div className="space-y-1">
@@ -107,6 +111,8 @@ export default function Edit({ products }: Props) {
                                 onChange={(e) => setData('cost', e.target.value)}
                                 className="border-[#e0d0c0]"
                             />
+                        {errors.cost && <p className="mt-1.5 text-sm text-danger">{errors.cost}</p>}
+
                         </div>
                     </div>
 
