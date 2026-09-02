@@ -62,4 +62,9 @@ class User extends Authenticatable
         return $this->hasOne(Inventory::class);
 
     }
+     public function sales()
+    {
+        return $this->hasMany(Sale::class,'encoder_id');
+
+    }
 }

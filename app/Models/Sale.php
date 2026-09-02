@@ -26,6 +26,10 @@ class Sale extends Model
     {
         return $this->belongsTo(Branch::class);
     }
+    public function encoder()
+    {
+        return $this->belongsTo(User::class,'encoder_id');
+    }
 
     public function inventory()
     {
