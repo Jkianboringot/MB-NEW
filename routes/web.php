@@ -12,15 +12,15 @@ Route::redirect('/', 'dashboard')->name('home');
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
 
-    Route::prefix('products')->group(
+    Route::prefix('products')->name('products.')->group(
         function () {
-            Route::get('/', [ProductController::class, 'index'])->name('products.index');
-            Route::get('/create', [ProductController::class, 'create'])->name('products.create');
-            Route::post('/', [ProductController::class, 'store'])->name('products.store');
-            Route::get('/{id}/edit', [ProductController::class, 'edit'])->name('products.edit');
+            Route::get('/', [ProductController::class, 'index'])->name('index');
+            Route::get('/create', [ProductController::class, 'create'])->name('create');
+            Route::post('/', [ProductController::class, 'store'])->name('store');
+            Route::get('/{id}/edit', [ProductController::class, 'edit'])->name('edit');
 
-            Route::delete('/{id}', [ProductController::class, 'delete'])->name('products.delete');
-            Route::put('/{id}', [ProductController::class, 'update'])->name('products.update');
+            Route::delete('/{id}', [ProductController::class, 'delete'])->name('delete');
+            Route::put('/{id}', [ProductController::class, 'update'])->name('update');
         }
     );
 
@@ -46,17 +46,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/', [BranchController::class, 'index'])
                 ->name('index');
 
+            // this is for productVIew
             Route::get('/{branch}/products', [BranchController::class, 'products'])
                 ->name('products');
+
+
+            Route::get('/create', [BranchController::class, 'create'])->name('create');
+            Route::post('/', [BranchController::class, 'store'])->name('store');
+
+            // just call ui
+            Route::get('/{id}/edit', [BranchController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [BranchController::class, 'update'])->name('update');
+
             Route::delete('/{id}', [BranchController::class, 'delete'])->name('delete');
 
-            Route::post('/in', [BranchController::class, 'storeIn'])
-                ->name('store-in');
 
-            Route::get('/create-out', [BranchController::class, 'createOut'])
-                ->name('create-out');
-            Route::post('/out', [BranchController::class, 'storeOut'])
-                ->name('store-out');
         }
     );
 

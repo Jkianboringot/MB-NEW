@@ -11,7 +11,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { Box, ChevronLeft, ChevronRight, Pencil, Search, Trash2 } from 'lucide-react';
-import { deleteMethod, index as branchesIndex, products } from '@/routes/branches';
+import { deleteMethod, index as branchesIndex, products, edit } from '@/routes/branches';
 
 interface Branch {
     id: number;
@@ -143,7 +143,8 @@ export default function Index() {
                                                 View Products
                                             </Link>
                                             <Link
-                                                href={`/branches/${branch.id}/edit`}
+                                                href={edit(branch.id).url}
+
                                                 className="flex items-center gap-1 text-sm font-medium text-ink hover:text-brand-orange"
                                             >
                                                 <Pencil className="h-4 w-4" />
@@ -171,11 +172,10 @@ export default function Index() {
                                 <Link
                                     key={i}
                                     href={link.url ?? '#'}
-                                    className={`flex items-center rounded-md px-3 py-1 text-sm ${
-                                        link.active
+                                    className={`flex items-center rounded-md px-3 py-1 text-sm ${link.active
                                             ? 'bg-brand-orange text-white'
                                             : 'text-brand-orange-hover hover:bg-[#fbead9]'
-                                    } ${!link.url ? 'pointer-events-none opacity-40' : ''}`}
+                                        } ${!link.url ? 'pointer-events-none opacity-40' : ''}`}
                                 >
                                     {paginationLabel(link.label)}
                                 </Link>
