@@ -6,11 +6,17 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CircleAlert } from 'lucide-react';
 import { store } from '@/routes/products';
 
+
+interface ProductForm {
+    name: string;
+    price: number;
+    cost: number;
+}
 export default function Create() {
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors } = useForm<ProductForm>({
         name: '',
-        price: '',
-        cost: '',
+        price: 0,
+        cost: 0,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -54,8 +60,11 @@ export default function Create() {
                         </Label>
                         <Input
                             id="name"
+                            type='text'
                             placeholder="Product name"
                             value={data.name}
+                            minLength={3}
+                            maxLength={75}
                             onChange={(e) => setData('name', e.target.value)}
                             className="border-[#e0d0c0]"
                         />
@@ -70,7 +79,8 @@ export default function Create() {
                                 id="price"
                                 type="number"
                                 step="0.01"
-                                min="0"
+                                min="1"
+                                max="99999"
                                 placeholder="0.00"
                                 value={data.price}
                                 onChange={(e) => setData('price', e.target.value)}
@@ -86,7 +96,9 @@ export default function Create() {
                                 id="cost"
                                 type="number"
                                 step="0.01"
-                                min="0"
+                                min="1"
+                                max="99999"
+
                                 placeholder="0.00"
                                 value={data.cost}
                                 onChange={(e) => setData('cost', e.target.value)}

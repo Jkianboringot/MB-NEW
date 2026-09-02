@@ -23,10 +23,10 @@ class ProductRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'min:3', 'max:75','unique:products,name', 'alpha_dash'],
-            'price' => ['required', 'numeric', 'min:3', "max:99999"],
+            'name' => ['required', 'string', 'min:3', 'max:75','unique:products,name'],
+            'price' => ['required', 'numeric', 'min:1', "max:99999"],
             // 'category' => ['nullable', 'string', 'min:3', 'max:75'],
-            'cost' => ['required', 'numeric', 'min:3', "max:99999"],
+            'cost' => ['required', 'numeric', 'min:1', "max:99999"],
 
         ];
     }

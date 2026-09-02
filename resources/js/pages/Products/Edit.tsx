@@ -33,7 +33,7 @@ export default function Edit({ products }: Props) {
         <>
             <Head title="Edit Product" />
 
-                       <div className="mx-auto w-full  max-w-4xl p-6">
+            <div className="mx-auto w-full  max-w-4xl p-6">
 
                 <div className="mb-4">
                     <h1 className="text-2xl font-bold text-ink">Edit Product</h1>
@@ -68,6 +68,9 @@ export default function Edit({ products }: Props) {
                             id="name"
                             placeholder="Product name"
                             value={data.name}
+                            minLength={3}
+                            maxLength={75}
+                            type='text'
                             onChange={(e) => setData('name', e.target.value)}
                             className="border-[#e0d0c0]"
                         />
@@ -82,7 +85,8 @@ export default function Edit({ products }: Props) {
                                 id="price"
                                 type="number"
                                 step="0.01"
-                                min="0"
+                                min="1"
+                                max="99999"
                                 value={data.price}
                                 onChange={(e) => setData('price', e.target.value)}
                                 className="border-[#e0d0c0]"
@@ -97,7 +101,8 @@ export default function Edit({ products }: Props) {
                                 id="cost"
                                 type="number"
                                 step="0.01"
-                                min="0"
+                                min="1"
+                                max="99999"
                                 value={data.cost}
                                 onChange={(e) => setData('cost', e.target.value)}
                                 className="border-[#e0d0c0]"
