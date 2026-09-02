@@ -83,9 +83,26 @@ class ProductController extends Controller
 
     // }
 
-    public function index()
+    public function index(Request $request)
     {
+        $products = Product::query()
+            ->when($request->string('search')->trim(), function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%");
+            })
+            ->when(
+                in_array($request->string('sort'), ['name', 'price', 'cost']),
+                fn($query) => $query->orderBy(
+                    $request->string('sort'),
+                    $request->string('direction') === 'desc' ? 'desc' : 'asc',
+                ),
+                fn($query) => $query->orderBy('name'),
+            )
+            ->paginate(15)
+            ->withQueryString();
 
-        return Inertia::render('Products/Index', ['products' => Product::get()]);
+        return Inertia::render('Products/Index', [
+            'products' => $products,
+            'filters' => $request->only(['search', 'sort', 'direction']),
+        ]);
     }
 }

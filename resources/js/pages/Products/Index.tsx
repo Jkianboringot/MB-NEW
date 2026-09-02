@@ -1,14 +1,15 @@
-import { useMemo, useState } from 'react';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { useState } from 'react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
     ChevronDown,
+    ChevronLeft,
+    ChevronRight,
     Megaphone,
     Pencil,
     Search,
-    SlidersHorizontal,
     Trash2,
 } from 'lucide-react';
 import {
@@ -19,13 +20,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-
-interface PageProps {
-    flash: {
-        message?: string;
-    };
-    products: Product[];
-}
+import { create, deleteMethod, edit, index as productsIndex } from '@/routes/products';
 
 interface Product {
     id: number;
@@ -34,58 +29,67 @@ interface Product {
     cost: number;
 }
 
-type SortKey = 'name' | 'price' | 'cost';
-type SortDirection = 'asc' | 'desc';
+interface PaginatedProducts {
+    data: Product[];
+    links: { url: string | null; label: string; active: boolean }[];
+}
+
+interface PageProps {
+    flash: {
+        message?: string;
+    };
+    products: PaginatedProducts;
+    filters: { search?: string; sort?: string; direction?: 'asc' | 'desc' };
+}
 
 function formatCurrency(value: number) {
     return Number(value).toFixed(2);
 }
 
+// Laravel's paginator labels are always one of these three shapes —
+// render icons for prev/next instead of trusting raw HTML entities.
+function paginationLabel(label: string) {
+    if (label.includes('Previous')) return <ChevronLeft className="h-4 w-4" />;
+    if (label.includes('Next')) return <ChevronRight className="h-4 w-4" />;
+    return label;
+}
+
 export default function Index() {
-    const { flash, products } = usePage().props as PageProps;
+    const { flash, products, filters } = usePage<PageProps & Record<string, unknown>>().props as unknown as PageProps;
+    const { processing, delete: destroyForm } = useForm();
+    const [search, setSearch] = useState(filters?.search ?? '');
 
-    const { processing, delete: destroy } = useForm();
-
-    const [search, setSearch] = useState('');
-    const [sortKey, setSortKey] = useState<SortKey>('name');
-    const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
-
-    const toggleSort = (key: SortKey) => {
-        if (sortKey === key) {
-            setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
-        } else {
-            setSortKey(key);
-            setSortDirection('asc');
-        }
-    };
-
-    const visibleProducts = useMemo(() => {
-        const filtered = products.filter((product) =>
-            product.name.toLowerCase().includes(search.toLowerCase()),
+    // Products are paginated server-side, so search and sort both round-trip
+    // to the server — client-side filtering/sorting would only ever touch
+    // whichever rows are on the current page.
+    function applySearch(value: string) {
+        setSearch(value);
+        router.get(
+            productsIndex().url,
+            { search: value, sort: filters.sort, direction: filters.direction },
+            { preserveState: true, replace: true },
         );
+    }
 
-        return filtered.sort((a, b) => {
-            const dir = sortDirection === 'asc' ? 1 : -1;
-            if (sortKey === 'price') {
-                return (a.price - b.price) * dir;
-            }
-            if (sortKey === 'cost') {
-                return (a.cost - b.cost) * dir;
-            }
-            return a.name.localeCompare(b.name) * dir;
-        });
-    }, [products, search, sortKey, sortDirection]);
+    function toggleSort(key: 'name' | 'price' | 'cost') {
+        const direction = filters.sort === key && filters.direction === 'asc' ? 'desc' : 'asc';
+        router.get(
+            productsIndex().url,
+            { search: filters.search, sort: key, direction },
+            { preserveState: true, replace: true },
+        );
+    }
 
     const handleDelete = (id: number, name: string) => {
         if (confirm(`Delete "${name}"? This can't be undone.`)) {
-            destroy(route('products.delete', id));
+            destroyForm(deleteMethod(id).url);
         }
     };
 
-    const sortIcon = (key: SortKey) => (
+    const sortIcon = (key: 'name' | 'price' | 'cost') => (
         <ChevronDown
             className={`h-3.5 w-3.5 transition-transform ${
-                sortKey === key && sortDirection === 'desc' ? 'rotate-180' : ''
+                filters.sort === key && filters.direction === 'desc' ? 'rotate-180' : ''
             }`}
         />
     );
@@ -109,7 +113,7 @@ export default function Index() {
                     <h1 className="text-3xl font-extrabold tracking-tight text-ink">
                         Products
                     </h1>
-                    <Link href={'/products/create'}>
+                    <Link href={create().url}>
                         <Button className="bg-brand-orange font-bold text-white hover:bg-brand-orange-hover">
                             New product
                         </Button>
@@ -122,12 +126,11 @@ export default function Index() {
                             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-orange" />
                             <Input
                                 value={search}
-                                onChange={(e) => setSearch(e.target.value)}
+                                onChange={(e) => applySearch(e.target.value)}
                                 placeholder="Search"
                                 className="w-56 border-brand-orange/40 bg-white pl-9 text-sm"
                             />
                         </div>
-                       
                     </div>
 
                     <Table>
@@ -167,14 +170,14 @@ export default function Index() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {visibleProducts.length === 0 && (
+                            {products.data.length === 0 && (
                                 <TableRow>
                                     <TableCell colSpan={4} className="py-10 text-center text-sm text-subtle">
                                         No products found.
                                     </TableCell>
                                 </TableRow>
                             )}
-                            {visibleProducts.map((product) => (
+                            {products.data.map((product) => (
                                 <TableRow
                                     key={product.id}
                                     className="border-b border-[#f0ddc8] last:border-0 hover:bg-[#fbf3e8]"
@@ -191,7 +194,7 @@ export default function Index() {
                                     <TableCell>
                                         <div className="flex items-center justify-end gap-4">
                                             <Link
-                                                href={`/products/${product.id}/edit`}
+                                                href={edit(product.id).url}
                                                 className="flex items-center gap-1 text-sm font-medium text-ink hover:text-brand-orange"
                                             >
                                                 <Pencil className="h-4 w-4" />
@@ -212,6 +215,24 @@ export default function Index() {
                             ))}
                         </TableBody>
                     </Table>
+
+                    {products.links.length > 3 && (
+                        <div className="flex gap-1 border-t border-[#f0ddc8] px-5 py-3">
+                            {products.links.map((link, i) => (
+                                <Link
+                                    key={i}
+                                    href={link.url ?? '#'}
+                                    className={`flex items-center rounded-md px-3 py-1 text-sm ${
+                                        link.active
+                                            ? 'bg-brand-orange text-white'
+                                            : 'text-brand-orange-hover hover:bg-[#fbead9]'
+                                    } ${!link.url ? 'pointer-events-none opacity-40' : ''}`}
+                                >
+                                    {paginationLabel(link.label)}
+                                </Link>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </>
