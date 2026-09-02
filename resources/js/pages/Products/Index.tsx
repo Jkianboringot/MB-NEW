@@ -127,12 +127,7 @@ export default function Index() {
                                 className="w-56 border-brand-orange/40 bg-white pl-9 text-sm"
                             />
                         </div>
-                        <button
-                            type="button"
-                            className="flex h-9 w-9 items-center justify-center rounded-md border border-brand-orange/40 bg-white text-brand-orange"
-                        >
-                            <SlidersHorizontal className="h-4 w-4" />
-                        </button>
+                       
                     </div>
 
                     <Table>
