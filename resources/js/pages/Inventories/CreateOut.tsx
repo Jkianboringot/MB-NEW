@@ -1,6 +1,16 @@
-import { storeOut } from '@/routes/inventories';
 import { useForm } from '@inertiajs/react';
 import { FormEvent, useMemo } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Plus, Trash2 } from 'lucide-react';
 
 interface Product {
     id: number;
@@ -19,7 +29,6 @@ interface ProductRow {
     quantity: number;
 }
 
-
 interface SelectOption {
     value: string;
     label: string;
@@ -31,14 +40,9 @@ interface Props {
     shifts: SelectOption[];
 }
 
-
-const inputClass =
-    'block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:bg-gray-50 disabled:text-gray-400';
-const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700';
-
 export default function CreateOut({ branches, stockMovementTypes, shifts }: Props) {
-    // HACK - the shift,and stockMvomentType needs to be the data type but i will skip it for now, becuase
-    // backend return value , label in the future make it directly check from enum
+    // HACK - the shift, and stockMovementType needs to be the data type but i will skip it for now, because
+    // backend return value, label — in the future make it directly check from enum
     const { data, setData, post, processing, errors } = useForm<{
         branch_id: number | '';
         productList: ProductRow[];
@@ -121,53 +125,59 @@ export default function CreateOut({ branches, stockMovementTypes, shifts }: Prop
     function submit(e: FormEvent) {
         e.preventDefault();
         setData('net_cash', total_cash);
-        post(storeOut().url, {
+        post(route('inventories.store.out'), {
             data: {
-                ...data
+                ...data,
             },
         });
     }
 
     return (
-        <div className="mx-4 max-w-6xl p-6">
+        <div className="p-6">
             <div className="mb-6">
-                <h1 className="text-xl font-semibold text-gray-900">Inventory Out</h1>
+                <h1 className="text-3xl font-extrabold tracking-tight text-ink">Inventory Out</h1>
             </div>
 
             <form onSubmit={submit} className="w-full">
-                <div className="w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                <div className="w-full overflow-hidden rounded-xl border border-[#f0ddc8] bg-[#fdf8f2]">
                     {/* Branch */}
-                    <div className="border-b border-gray-100 p-6">
-                        <h2 className="mb-4 text-sm font-semibold text-gray-900">Branch</h2>
-                        <select
-                            className={inputClass}
-                            value={data.branch_id}
-                            onChange={(e) => handleBranchChange(Number(e.target.value))}
+                    <div className="border-b border-[#f0ddc8] p-6">
+                        <h2 className="mb-4 text-sm font-semibold text-ink">Branch</h2>
+                        <Select
+                            value={data.branch_id ? String(data.branch_id) : undefined}
+                            onValueChange={(value) => handleBranchChange(Number(value))}
                         >
-                            <option value="">Select a branch…</option>
-                            {branches.map((b) => (
-                                <option key={b.id} value={b.id}>
-                                    {b.location}
-                                </option>
-                            ))}
-                        </select>
-                        {errors.branch_id && <p className="mt-1.5 text-sm text-red-600">{errors.branch_id}</p>}
+                            <SelectTrigger className="w-full bg-white">
+                                <SelectValue placeholder="Select a branch…" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {branches.map((b) => (
+                                    <SelectItem key={b.id} value={String(b.id)}>
+                                        {b.location}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        {errors.branch_id && <p className="mt-1.5 text-sm text-danger">{errors.branch_id}</p>}
                     </div>
 
                     {/* Products sold */}
-                    <div className="border-b border-gray-100 p-6">
+                    <div className="border-b border-[#f0ddc8] p-6">
                         <div className="mb-1 flex items-center justify-between">
-                            <h2 className="text-sm font-semibold text-gray-900">Products Sold</h2>
-                            <button
+                            <h2 className="text-sm font-semibold text-ink">Products Sold</h2>
+                            <Button
                                 type="button"
+                                variant="ghost"
+                                size="sm"
                                 onClick={addRow}
                                 disabled={!selectedBranch}
-                                className="text-sm font-medium text-orange-600 hover:text-orange-700 disabled:opacity-40"
+                                className="text-brand-orange hover:text-brand-orange-hover disabled:opacity-40"
                             >
-                                + Add Product
-                            </button>
+                                <Plus className="h-4 w-4" />
+                                Add Product
+                            </Button>
                         </div>
-                        <p className="mb-4 text-xs text-gray-500">Only products already stocked at the selected branch can be sold.</p>
+                        <p className="mb-4 text-xs text-subtle">Only products already stocked at the selected branch can be sold.</p>
 
                         <div className="space-y-3">
                             {data.productList.map((row, i) => {
@@ -177,100 +187,108 @@ export default function CreateOut({ branches, stockMovementTypes, shifts }: Prop
                                 return (
                                     <div
                                         key={i}
-                                        className="flex flex-col gap-3 rounded-lg border border-gray-100 bg-gray-50/60 p-3 sm:flex-row sm:items-start"
+                                        className="flex flex-col gap-3 rounded-lg border border-[#f0ddc8] bg-white/60 p-3 sm:flex-row sm:items-start"
                                     >
-                                        <select
-                                            className={`${inputClass} flex-1`}
-                                            value={row.product_id}
+                                        <Select
+                                            value={row.product_id ? String(row.product_id) : undefined}
                                             disabled={!selectedBranch}
-                                            onChange={(e) => updateRow(i, 'product_id', Number(e.target.value))}
+                                            onValueChange={(value) => updateRow(i, 'product_id', Number(value))}
                                         >
-                                            <option value="">
-                                                {selectedBranch ? 'Select product…' : 'Select a branch first…'}
-                                            </option>
-                                            {selectedBranch?.products
-                                                .filter((p) => !excluded.includes(p.id))
-                                                .map((p) => (
-                                                    <option key={p.id} value={p.id}>
-                                                        {p.name} ({p.quantity} in stock)
-                                                    </option>
-                                                ))}
-                                        </select>
+                                            <SelectTrigger className="flex-1 bg-white">
+                                                <SelectValue
+                                                    placeholder={selectedBranch ? 'Select product…' : 'Select a branch first…'}
+                                                />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {selectedBranch?.products
+                                                    .filter((p) => !excluded.includes(p.id))
+                                                    .map((p) => (
+                                                        <SelectItem key={p.id} value={String(p.id)}>
+                                                            {p.name} ({p.quantity} in stock)
+                                                        </SelectItem>
+                                                    ))}
+                                            </SelectContent>
+                                        </Select>
 
-                                        <input
+                                        <Input
                                             type="number"
                                             disabled
                                             value={stock ?? ''}
                                             placeholder="In stock"
-                                            className={`${inputClass} sm:w-28`}
+                                            className="bg-white sm:w-28"
                                         />
 
-                                        <input
+                                        <Input
                                             type="number"
                                             step="0.01"
                                             min="0.01"
                                             max={stock ?? undefined}
-                                            className={`${inputClass} sm:w-28`}
+                                            className="bg-white sm:w-28"
                                             placeholder="Qty sold"
                                             value={row.quantity}
                                             onChange={(e) => updateRow(i, 'quantity', Number(e.target.value))}
                                         />
 
-                                        <button
+                                        <Button
                                             type="button"
+                                            variant="ghost"
+                                            size="sm"
                                             onClick={() => removeRow(i)}
                                             disabled={data.productList.length === 1}
-                                            className="shrink-0 rounded-md px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-40"
+                                            className="shrink-0 text-danger hover:bg-danger/10 hover:text-danger disabled:opacity-40"
                                         >
+                                            <Trash2 className="h-4 w-4" />
                                             Remove
-                                        </button>
+                                        </Button>
                                     </div>
                                 );
                             })}
                         </div>
-                        {errors.productList && <p className="mt-2 text-sm text-red-600">{errors.productList}</p>}
+                        {errors.productList && <p className="mt-2 text-sm text-danger">{errors.productList}</p>}
                     </div>
 
                     {/* Cash summary */}
                     <div className="p-6">
-                        <h2 className="mb-4 text-sm font-semibold text-gray-900">Cash Summary</h2>
+                        <h2 className="mb-4 text-sm font-semibold text-ink">Cash Summary</h2>
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <div >
-                                <label className={labelClass}>Shift</label>
-                                <select
-                                    className={`${inputClass} sm:max-w-xs`}
-                                    value={data.shift}
-                                    onChange={(e) => setData('shift', e.target.value)}
-                                >
-
-                                    <option value="">Select shift…</option>
-
-                                {shifts.map((v) => (
-                                    
-                                        <option key={v.value} value={v.value}>{v.label}</option>
-                                    ))}
-                                </select>
-                                {errors.shift && <p className="mt-1.5 text-sm text-red-600">{errors.shift}</p>}
+                            <div>
+                                <Label htmlFor="shift">Shift</Label>
+                                <Select value={data.shift || undefined} onValueChange={(value) => setData('shift', value)}>
+                                    <SelectTrigger id="shift" className="mt-1.5 w-full bg-white sm:max-w-xs">
+                                        <SelectValue placeholder="Select shift…" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {shifts.map((v) => (
+                                            <SelectItem key={v.value} value={v.value}>
+                                                {v.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {errors.shift && <p className="mt-1.5 text-sm text-danger">{errors.shift}</p>}
                             </div>
 
-                            <div >
-                                <label className={labelClass}>Stock Type</label>
-                                <select
-                                    className={`${inputClass} sm:max-w-xs`}
-
-                                    value={data.stock_movement_type}
-                                    onChange={(e) => setData('stock_movement_type', e.target.value)}
+                            <div>
+                                <Label htmlFor="stock_movement_type">Stock Type</Label>
+                                <Select
+                                    value={data.stock_movement_type || undefined}
+                                    onValueChange={(value) => setData('stock_movement_type', value)}
                                 >
-                                    <option value="">Select stock movement…</option>
-
-                                    {stockMovementTypes.map((t) => (
-                                        <option key={t.value} value={t.value}>{t.label}</option>
-                                    ))}
-                                </select>
-                                {errors.stock_movement_type && <p className="mt-1.5 text-sm text-red-600">{errors.stock_movement_type}</p>}
+                                    <SelectTrigger id="stock_movement_type" className="mt-1.5 w-full bg-white sm:max-w-xs">
+                                        <SelectValue placeholder="Select stock movement…" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {stockMovementTypes.map((t) => (
+                                            <SelectItem key={t.value} value={t.value}>
+                                                {t.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {errors.stock_movement_type && (
+                                    <p className="mt-1.5 text-sm text-danger">{errors.stock_movement_type}</p>
+                                )}
                             </div>
-
-
 
                             <MoneyField label="Cash on Hand" value={data.cash_amount} onChange={(v) => setData('cash_amount', v)} error={errors.cash_amount} />
                             <MoneyField label="Cash Shortage" value={data.cash_shortage} onChange={(v) => setData('cash_shortage', v)} error={errors.cash_shortage} />
@@ -279,21 +297,17 @@ export default function CreateOut({ branches, stockMovementTypes, shifts }: Prop
                             <MoneyField label="Remitted Expenses" value={data.remitted_expenses} onChange={(v) => setData('remitted_expenses', v)} error={errors.remitted_expenses} />
                         </div>
 
-                        <div className="mt-4 flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-                            <span className="text-sm font-medium text-gray-700">Total</span>
-                            <span className="text-base font-semibold text-gray-900">₱{total_cash.toFixed(2)}</span>
+                        <div className="mt-4 flex items-center justify-between rounded-lg border border-[#f0ddc8] bg-white/60 px-4 py-3">
+                            <span className="text-sm font-medium text-ink">Total</span>
+                            <span className="text-base font-semibold text-ink">₱{total_cash.toFixed(2)}</span>
                         </div>
                     </div>
 
                     {/* Actions */}
-                    <div className="flex justify-end border-t border-gray-100 bg-gray-50/60 px-6 py-4">
-                        <button
-                            type="submit"
-                            disabled={processing}
-                            className="rounded-md bg-green-600 px-6 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
-                        >
+                    <div className="flex justify-end border-t border-[#f0ddc8] bg-white/60 px-6 py-4">
+                        <Button type="submit" disabled={processing} className="bg-green-600 font-bold text-white hover:bg-green-700">
                             {processing ? 'Saving…' : 'Save Sale'}
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </form>
@@ -314,18 +328,12 @@ function MoneyField({
 }) {
     return (
         <div>
-            <label className={labelClass}>{label}</label>
-            <div className="relative">
-                <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-gray-400">₱</span>
-                <input
-                    type="number"
-                    step="0.01"
-                    className={`${inputClass} pl-7`}
-                    value={value}
-                    onChange={(e) => onChange(Number(e.target.value))}
-                />
+            <Label>{label}</Label>
+            <div className="relative mt-1.5">
+                <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-subtle">₱</span>
+                <Input type="number" step="0.01" className="bg-white pl-7" value={value} onChange={(e) => onChange(Number(e.target.value))} />
             </div>
-            {error && <p className="mt-1.5 text-sm text-red-600">{error}</p>}
+            {error && <p className="mt-1.5 text-sm text-danger">{error}</p>}
         </div>
     );
 }

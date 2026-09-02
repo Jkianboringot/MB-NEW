@@ -1,6 +1,16 @@
-import { storeIn } from '@/routes/inventories';
 import { useForm } from '@inertiajs/react';
 import { FormEvent } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Plus, Trash2 } from 'lucide-react';
 
 interface Branch {
     id: number;
@@ -14,9 +24,6 @@ interface Product {
     price: number;
 }
 
-
-
-
 interface ProductRow {
     product_id: number | '';
     quantity: number;
@@ -28,12 +35,6 @@ interface Props {
     stockMovementTypes: { value: string; label: string }[];
 }
 
-// Shared tokens — reuse these two strings on every field across the app
-// so forms stay visually consistent without hand-tuning each one.
-const inputClass =
-    'block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:bg-gray-50 disabled:text-gray-400';
-const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700';
-
 export default function CreateIn({ branches, products, stockMovementTypes }: Props) {
     const { data, setData, post, processing, errors } = useForm<{
         branch_id: number | '';
@@ -42,7 +43,6 @@ export default function CreateIn({ branches, products, stockMovementTypes }: Pro
     }>({
         branch_id: '',
         stock_movement_type: 'delivery',
-
         productList: [{ product_id: '', quantity: 1 }],
     });
 
@@ -65,51 +65,58 @@ export default function CreateIn({ branches, products, stockMovementTypes }: Pro
 
     function submit(e: FormEvent) {
         e.preventDefault();
-        post(storeIn().url);
+        post(route('inventories.store.in'));
     }
 
     return (
-        <div className="mx-4 max-w-6xl p-6">
+        <div className="p-6">
             <div className="mb-6">
-                <h1 className="text-xl font-semibold text-gray-900">Inventory In</h1>
+                <h1 className="text-3xl font-extrabold tracking-tight text-ink">Inventory In</h1>
             </div>
 
             <form onSubmit={submit} className="w-full">
-                <div className="w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                <div className="w-full overflow-hidden rounded-xl border border-[#f0ddc8] bg-[#fdf8f2]">
                     {/* Details */}
-                    <div className="border-b border-gray-100 p-6">
-                        <h2 className="mb-4 text-sm font-semibold text-gray-900">Details</h2>
+                    <div className="border-b border-[#f0ddc8] p-6">
+                        <h2 className="mb-4 text-sm font-semibold text-ink">Details</h2>
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div>
-                                <label className={labelClass}>Branch</label>
-                                <select
-                                    className={inputClass}
-                                    value={data.branch_id}
-                                    onChange={(e) => setData('branch_id', Number(e.target.value))}
+                                <Label htmlFor="branch_id">Branch</Label>
+                                <Select
+                                    value={data.branch_id ? String(data.branch_id) : undefined}
+                                    onValueChange={(value) => setData('branch_id', Number(value))}
                                 >
-                                    <option value="">Select a branch…</option>
-                                    {branches.map((b) => (
-                                        <option key={b.id} value={b.id}>
-                                            {b.location} ({b.branch_type})
-                                        </option>
-                                    ))}
-                                </select>
-                                {errors.branch_id && <p className="mt-1.5 text-sm text-red-600">{errors.branch_id}</p>}
+                                    <SelectTrigger id="branch_id" className="mt-1.5 w-full bg-white">
+                                        <SelectValue placeholder="Select a branch…" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {branches.map((b) => (
+                                            <SelectItem key={b.id} value={String(b.id)}>
+                                                {b.location} ({b.branch_type})
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {errors.branch_id && <p className="mt-1.5 text-sm text-danger">{errors.branch_id}</p>}
                             </div>
 
                             <div>
-                                <label className={labelClass}>Stock Type</label>
-                                <select
-                                    className={inputClass}
-                                    value={data.stock_movement_type}
-                                    onChange={(e) => setData('stock_movement_type', e.target.value)}
+                                <Label htmlFor="stock_movement_type">Stock Type</Label>
+                                <Select
+                                    value={data.stock_movement_type || undefined}
+                                    onValueChange={(value) => setData('stock_movement_type', value)}
                                 >
-                                    <option value="">Select stock movement…</option>
-
-                                    {stockMovementTypes.map((t) => (
-                                        <option key={t.value} value={t.value}>{t.label}</option>
-                                    ))}
-                                </select>
+                                    <SelectTrigger id="stock_movement_type" className="mt-1.5 w-full bg-white">
+                                        <SelectValue placeholder="Select stock movement…" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {stockMovementTypes.map((t) => (
+                                            <SelectItem key={t.value} value={t.value}>
+                                                {t.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
                     </div>
@@ -117,68 +124,67 @@ export default function CreateIn({ branches, products, stockMovementTypes }: Pro
                     {/* Products */}
                     <div className="p-6">
                         <div className="mb-4 flex items-center justify-between">
-                            <h2 className="text-sm font-semibold text-gray-900">Products Received</h2>
-                            <button
-                                type="button"
-                                onClick={addRow}
-                                className="text-sm font-medium text-orange-600 hover:text-orange-700"
-                            >
-                                + Add Product
-                            </button>
+                            <h2 className="text-sm font-semibold text-ink">Products Received</h2>
+                            <Button type="button" variant="ghost" size="sm" onClick={addRow} className="text-brand-orange hover:text-brand-orange-hover">
+                                <Plus className="h-4 w-4" />
+                                Add Product
+                            </Button>
                         </div>
 
                         <div className="space-y-3">
                             {data.productList.map((row, i) => (
                                 <div
                                     key={i}
-                                    className="flex flex-col gap-3 rounded-lg border border-gray-100 bg-gray-50/60 p-3 sm:flex-row sm:items-start"
+                                    className="flex flex-col gap-3 rounded-lg border border-[#f0ddc8] bg-white/60 p-3 sm:flex-row sm:items-start"
                                 >
-                                    <select
-                                        className={`${inputClass} flex-1`}
-                                        value={row.product_id}
-                                        onChange={(e) => updateRow(i, 'product_id', Number(e.target.value))}
+                                    <Select
+                                        value={row.product_id ? String(row.product_id) : undefined}
+                                        onValueChange={(value) => updateRow(i, 'product_id', Number(value))}
                                     >
-                                        <option value="">Select product…</option>
-                                        {products.map((p) => (
-                                            <option key={p.id} value={p.id}>
-                                                {p.name}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        <SelectTrigger className="flex-1 bg-white">
+                                            <SelectValue placeholder="Select product…" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {products.map((p) => (
+                                                <SelectItem key={p.id} value={String(p.id)}>
+                                                    {p.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
 
-                                    <input
+                                    <Input
                                         type="number"
                                         step="0.01"
                                         min="0.01"
-                                        className={`${inputClass} sm:w-28`}
+                                        className="bg-white sm:w-28"
                                         placeholder="Qty"
                                         value={row.quantity}
                                         onChange={(e) => updateRow(i, 'quantity', Number(e.target.value))}
                                     />
 
-                                    <button
+                                    <Button
                                         type="button"
+                                        variant="ghost"
+                                        size="sm"
                                         onClick={() => removeRow(i)}
                                         disabled={data.productList.length === 1}
-                                        className="shrink-0 rounded-md px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-40"
+                                        className="shrink-0 text-danger hover:bg-danger/10 hover:text-danger disabled:opacity-40"
                                     >
+                                        <Trash2 className="h-4 w-4" />
                                         Remove
-                                    </button>
+                                    </Button>
                                 </div>
                             ))}
                         </div>
-                        {errors.productList && <p className="mt-2 text-sm text-red-600">{errors.productList}</p>}
+                        {errors.productList && <p className="mt-2 text-sm text-danger">{errors.productList}</p>}
                     </div>
 
                     {/* Actions */}
-                    <div className="flex justify-end border-t border-gray-100 bg-gray-50/60 px-6 py-4">
-                        <button
-                            type="submit"
-                            disabled={processing}
-                            className="rounded-md bg-green-600 px-6 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
-                        >
+                    <div className="flex justify-end border-t border-[#f0ddc8] bg-white/60 px-6 py-4">
+                        <Button type="submit" disabled={processing} className="bg-green-600 font-bold text-white hover:bg-green-700">
                             {processing ? 'Saving…' : 'Save Stock In'}
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </form>

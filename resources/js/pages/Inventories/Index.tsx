@@ -1,5 +1,16 @@
-import { createIn, createOut } from '@/routes/inventories';
 import { Link, usePage } from '@inertiajs/react';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { ArrowDownCircle, ArrowUpCircle, Megaphone } from 'lucide-react';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
+import { createIn, createOut } from '@/routes/inventories';
 
 interface InventoryRow {
     id: number;
@@ -27,101 +38,114 @@ export default function Index() {
     const { inventories, flash } = usePage<PageProps & Record<string, unknown>>().props as unknown as PageProps;
 
     return (
-        <div className="mx-4 max-w-6xl p-6">
+        <div className="p-6">
+            {flash?.success && (
+                <div className="mb-4">
+                    <Alert>
+                        <Megaphone />
+                        <AlertTitle>Notification</AlertTitle>
+                        <AlertDescription>{flash.success}</AlertDescription>
+                    </Alert>
+                </div>
+            )}
+            {flash?.error && (
+                <div className="mb-4">
+                    <Alert variant="destructive">
+                        <Megaphone />
+                        <AlertTitle>Error</AlertTitle>
+                        <AlertDescription>{flash.error}</AlertDescription>
+                    </Alert>
+                </div>
+            )}
+
             <div className="mb-6 flex items-center justify-between">
                 <div>
-                    <h1 className="text-xl font-semibold text-gray-900">Inventories</h1>
-                    <p className="mt-1 text-sm text-gray-500">Stock movements across all branches.</p>
+                    <h1 className="text-3xl font-extrabold tracking-tight text-ink">Inventories</h1>
+                    <p className="mt-1 text-sm text-subtle">Stock movements across all branches.</p>
                 </div>
                 <div className="flex gap-2">
-                    <Link
-                        href={createIn().url}
-                        className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
-                    >
-                        + IN
+                    <Link href={createIn().url}>
+                        <Button className="bg-green-600 font-bold text-white hover:bg-green-700">
+                            <ArrowDownCircle className="h-4 w-4" />
+                            IN
+                        </Button>
                     </Link>
-                    <Link
-                        href={createOut().url}
-                        className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-                    >
-                        + OUT
+                    <Link href={createOut().url}>
+
+                        <Button className="bg-red-600 font-bold text-white hover:bg-red-700">
+                            <ArrowUpCircle className="h-4 w-4" />
+                            OUT
+                        </Button>
                     </Link>
                 </div>
             </div>
 
-            {flash?.success && (
-                <div className="mb-4 rounded-md border border-green-200 bg-green-50 px-4 py-2.5 text-sm text-green-700">
-                    {flash.success}
-                </div>
-            )}
-            {flash?.error && (
-                <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-700">
-                    {flash.error}
-                </div>
-            )}
+            <div className="overflow-hidden rounded-xl border border-[#f0ddc8] bg-[#fdf8f2]">
+                <Table>
+                    <TableHeader>
+                        <TableRow className="border-b border-[#f0ddc8] bg-[#fbead9] hover:bg-[#fbead9]">
+                            <TableHead>#</TableHead>
+                            <TableHead>Type</TableHead>
+                            <TableHead>Branch</TableHead>
+                            <TableHead>Inventory Type</TableHead>
+                            <TableHead>Encoder</TableHead>
+                            <TableHead className="text-right">Cash on Hand</TableHead>
+                            <TableHead className="text-right">Total Cash</TableHead>
+                            <TableHead>Date</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {inventories.data.length === 0 && (
+                            <TableRow>
+                                <TableCell colSpan={8} className="py-10 text-center text-sm text-subtle">
+                                    No inventory records yet.
+                                </TableCell>
+                            </TableRow>
+                        )}
+                        {inventories.data.map((inv) => (
+                            <TableRow
+                                key={inv.id}
+                                className="border-b border-[#f0ddc8] last:border-0 hover:bg-[#fbf3e8]"
+                            >
+                                <TableCell className="text-subtle">{inv.id}</TableCell>
+                                <TableCell>
+                                    <span
+                                        className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                                            inv.inventory_type === 'IN'
+                                                ? 'bg-green-100 text-green-700'
+                                                : 'bg-red-100 text-red-700'
+                                        }`}
+                                    >
+                                        {inv.inventory_type}
+                                    </span>
+                                </TableCell>
+                                <TableCell className="font-medium text-[#7a3b12]">{inv.branch ?? '—'}</TableCell>
+                                <TableCell>{inv.stock_movement_type ?? '—'}</TableCell>
+                                <TableCell>{inv.encoder ?? '—'}</TableCell>
+                                <TableCell className="text-right">
+                                    {inv.cash_amount !== null ? `₱${inv.cash_amount}` : '—'}
+                                </TableCell>
+                                <TableCell className="text-right font-medium text-[#7a3b12]">
+                                    {inv.net_cash !== null ? `₱${inv.net_cash}` : '—'}
+                                </TableCell>
+                                <TableCell className="text-subtle">{inv.created_at}</TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
 
-            <div className="w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                <div className="w-full overflow-x-auto">
-                    <table className="w-full text-sm">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-4 py-3 text-left font-medium text-gray-500">#</th>
-                                <th className="px-4 py-3 text-left font-medium text-gray-500">Type</th>
-                                <th className="px-4 py-3 text-left font-medium text-gray-500">Branch</th>
-                                <th className="px-4 py-3 text-left font-medium text-gray-500">Inventory Type</th>
-                                <th className="px-4 py-3 text-left font-medium text-gray-500">Encoder</th>
-                                <th className="px-4 py-3 text-right font-medium text-gray-500">Cash on Hand</th>
-                                <th className="px-4 py-3 text-right font-medium text-gray-500">Total Cash</th>
-                                <th className="px-4 py-3 text-left font-medium text-gray-500">Date</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {inventories.data.map((inv) => (
-                                <tr key={inv.id} className="hover:bg-gray-50">
-                                    <td className="px-4 py-3 text-gray-500">{inv.id}</td>
-                                    <td className="px-4 py-3">
-                                        <span
-                                            className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                                                inv.inventory_type === 'IN'
-                                                    ? 'bg-green-100 text-green-700'
-                                                    : 'bg-red-100 text-red-700'
-                                            }`}
-                                        >
-                                            {inv.inventory_type}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3 text-gray-900">{inv.branch ?? '—'}</td>
-                                    <td className="px-4 py-3 text-gray-700">{inv.stock_movement_type ?? '—'}</td>
-                                    <td className="px-4 py-3 text-gray-700">{inv.encoder ?? '—'}</td>
-                                    <td className="px-4 py-3 text-right text-gray-900">
-                                        {inv.cash_amount !== null ? `₱${inv.cash_amount}` : '—'}
-                                    </td>
-                                    <td className="px-4 py-3 text-right font-medium text-gray-900">
-                                        {inv.net_cash !== null ? `₱${inv.net_cash}` : '—'}
-                                    </td>
-                                    <td className="px-4 py-3 text-gray-500">{inv.created_at}</td>
-                                </tr>
-                            ))}
-                            {inventories.data.length === 0 && (
-                                <tr>
-                                    <td colSpan={8} className="px-4 py-10 text-center text-sm text-gray-500">
-                                        No inventory records yet.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-
+{/* SECURITY - the dangerouslySetInnerHTML is bad becuase it does not stop xxs, remove that and change it to something else*/}
                 {inventories.links.length > 3 && (
-                    <div className="flex gap-1 border-t border-gray-100 px-4 py-3">
+                    <div className="flex gap-1 border-t border-[#f0ddc8] px-5 py-3">
                         {inventories.links.map((link, i) => (
                             <Link
                                 key={i}
                                 href={link.url ?? '#'}
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                                 className={`rounded-md px-3 py-1 text-sm ${
-                                    link.active ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'
+                                    link.active
+                                        ? 'bg-brand-orange text-white'
+                                        : 'text-brand-orange-hover hover:bg-[#fbead9]'
                                 } ${!link.url ? 'pointer-events-none opacity-40' : ''}`}
                             />
                         ))}
@@ -131,3 +155,12 @@ export default function Index() {
         </div>
     );
 }
+
+Index.layout = {
+    breadcrumbs: [
+        {
+            title: 'Inventories',
+            href: '/inventories',
+        },
+    ],
+};
