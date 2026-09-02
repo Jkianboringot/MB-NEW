@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
-    ChevronDown,
     ChevronLeft,
     ChevronRight,
     Megaphone,
@@ -39,7 +38,7 @@ interface PageProps {
         message?: string;
     };
     products: PaginatedProducts;
-    filters: { search?: string; sort?: string; direction?: 'asc' | 'desc' };
+    filters: { search?: string };
 }
 
 function formatCurrency(value: number) {
@@ -59,23 +58,14 @@ export default function Index() {
     const { processing, delete: destroyForm } = useForm();
     const [search, setSearch] = useState(filters?.search ?? '');
 
-    // Products are paginated server-side, so search and sort both round-trip
-    // to the server — client-side filtering/sorting would only ever touch
-    // whichever rows are on the current page.
+    // Products are paginated server-side, so search round-trips to the
+    // server — client-side filtering would only ever touch whichever
+    // rows are on the current page.
     function applySearch(value: string) {
         setSearch(value);
         router.get(
             productsIndex().url,
-            { search: value, sort: filters.sort, direction: filters.direction },
-            { preserveState: true, replace: true },
-        );
-    }
-
-    function toggleSort(key: 'name' | 'price' | 'cost') {
-        const direction = filters.sort === key && filters.direction === 'asc' ? 'desc' : 'asc';
-        router.get(
-            productsIndex().url,
-            { search: filters.search, sort: key, direction },
+            { search: value },
             { preserveState: true, replace: true },
         );
     }
@@ -85,14 +75,6 @@ export default function Index() {
             destroyForm(deleteMethod(id).url);
         }
     };
-
-    const sortIcon = (key: 'name' | 'price' | 'cost') => (
-        <ChevronDown
-            className={`h-3.5 w-3.5 transition-transform ${
-                filters.sort === key && filters.direction === 'desc' ? 'rotate-180' : ''
-            }`}
-        />
-    );
 
     return (
         <>
@@ -136,36 +118,9 @@ export default function Index() {
                     <Table>
                         <TableHeader>
                             <TableRow className="border-b border-[#f0ddc8] bg-[#fbead9] hover:bg-[#fbead9]">
-                                <TableHead>
-                                    <button
-                                        type="button"
-                                        onClick={() => toggleSort('name')}
-                                        className="flex items-center gap-1 font-bold text-brand-orange-hover"
-                                    >
-                                        Name
-                                        {sortIcon('name')}
-                                    </button>
-                                </TableHead>
-                                <TableHead className="text-center">
-                                    <button
-                                        type="button"
-                                        onClick={() => toggleSort('price')}
-                                        className="mx-auto flex items-center gap-1 font-bold text-brand-orange-hover"
-                                    >
-                                        Price
-                                        {sortIcon('price')}
-                                    </button>
-                                </TableHead>
-                                <TableHead className="text-center">
-                                    <button
-                                        type="button"
-                                        onClick={() => toggleSort('cost')}
-                                        className="mx-auto flex items-center gap-1 font-bold text-brand-orange-hover"
-                                    >
-                                        Cost
-                                        {sortIcon('cost')}
-                                    </button>
-                                </TableHead>
+                                <TableHead className="font-bold text-brand-orange-hover">Name</TableHead>
+                                <TableHead className="text-center font-bold text-brand-orange-hover">Price</TableHead>
+                                <TableHead className="text-center font-bold text-brand-orange-hover">Cost</TableHead>
                                 <TableHead className="text-right">Action</TableHead>
                             </TableRow>
                         </TableHeader>
