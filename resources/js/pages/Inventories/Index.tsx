@@ -61,7 +61,7 @@ export default function Index() {
             <div className="mb-6 flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-extrabold tracking-tight text-ink">Inventories</h1>
-                    <p className="mt-1 text-sm text-subtle">Stock movements across all branches.</p>
+                    {/* <p className="mt-1 text-sm text-subtle">Stock movements across all branches.</p> */}
                 </div>
                 <div className="flex gap-2">
                     <Link href={createIn().url}>

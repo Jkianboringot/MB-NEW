@@ -11,6 +11,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Plus, Trash2 } from 'lucide-react';
+import { createIn, storeIn } from '@/routes/inventories';
 
 interface Branch {
     id: number;
@@ -65,7 +66,8 @@ export default function CreateIn({ branches, products, stockMovementTypes }: Pro
 
     function submit(e: FormEvent) {
         e.preventDefault();
-        post(route('inventories.store.in'));
+        
+        post(storeIn().url);
     }
 
     return (

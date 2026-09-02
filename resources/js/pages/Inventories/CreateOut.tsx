@@ -11,6 +11,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Plus, Trash2 } from 'lucide-react';
+import { storeOut } from '@/routes/inventories';
 
 interface Product {
     id: number;
@@ -125,9 +126,9 @@ export default function CreateOut({ branches, stockMovementTypes, shifts }: Prop
     function submit(e: FormEvent) {
         e.preventDefault();
         setData('net_cash', total_cash);
-        post(route('inventories.store.out'), {
+        post(storeOut().url, {
             data: {
-                ...data,
+                ...data
             },
         });
     }
