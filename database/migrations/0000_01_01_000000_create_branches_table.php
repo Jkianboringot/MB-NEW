@@ -15,10 +15,13 @@ return new class extends Migration
     {
         Schema::create('branches', function (Blueprint $table) {
             $table->id();
-            $table->string('location',100); 
-            $table->string('name',100);
+            $table->string('location',100)->nullable(); 
+
+            // i want to make this unique since they use it alot and lets just levrage that thinking to if they want 
+            // search they want it on the name not location
+            $table->string('name',100)->unique(); 
             $table->string('branch_type',40)->default(BranchType::Branch->value);//dont really need this just mean first branch as main
-            $table->index('location','branches_location_index');
+            // $table->index('location','branches_location_index');
             // i index this becauase i will use locaton alot for filter , joins , and search espicailly in admin Sidebar
             // and cashier view for branch_ingredient, branch_order, etc
 
