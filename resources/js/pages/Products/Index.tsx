@@ -36,9 +36,11 @@ interface PaginatedProducts {
 interface PageProps {
     flash: {
         message?: string;
+         error?: string;
     };
     products: PaginatedProducts;
     filters: { search?: string };
+
 }
 
 function formatCurrency(value: number) {
@@ -89,16 +91,25 @@ export default function Index() {
         <>
             <Head title="Products" />
 
-            <div className="p-6">
-                {flash.message && (
-                    <div className="mb-4">
-                        <Alert>
-                            <Megaphone />
-                            <AlertTitle>Notification</AlertTitle>
-                            <AlertDescription>{flash.message}</AlertDescription>
-                        </Alert>
-                    </div>
-                )}
+                <div className="p-6">
+                    {flash.message && (
+                        <div className="mb-4">
+                            <Alert>
+                                <Megaphone />
+                                <AlertTitle>Notification</AlertTitle>
+                                <AlertDescription>{flash.message}</AlertDescription>
+                            </Alert>
+                        </div>
+                    )}
+                       {flash?.error && (
+                                    <div className="mb-4">
+                                        <Alert variant="destructive">
+                                            <Megaphone />
+                                            <AlertTitle>Error</AlertTitle>
+                                            <AlertDescription>{flash.error}</AlertDescription>
+                                        </Alert>
+                                    </div>
+                                )}
 
                 <div className="mb-6 flex items-center justify-between">
                     <h1 className="text-3xl font-extrabold tracking-tight text-ink">

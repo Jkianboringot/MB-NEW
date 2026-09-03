@@ -90,7 +90,8 @@ class ProductController extends Controller
             ->when($request->string('search')->trim(), function ($query, $search) {
                 $query->where('name', 'like', "{$search}%");
             })
-            ->orderBy('created_at')
+            ->orderBy('created_at','desc')
+
             ->paginate(15)
             ->withQueryString();
 
