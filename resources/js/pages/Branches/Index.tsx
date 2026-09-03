@@ -10,8 +10,9 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Box, ChevronLeft, ChevronRight, Pencil, Search, Trash2 } from 'lucide-react';
+import { Box, ChevronLeft, ChevronRight, Megaphone, Pencil, Search, Trash2 } from 'lucide-react';
 import { deleteMethod, index as branchesIndex, products, edit } from '@/routes/branches';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface Branch {
     id: number;
@@ -29,6 +30,9 @@ interface PaginatedBranches {
 interface PageProps {
     branches: PaginatedBranches;
     filters: { search?: string };
+    flash: {
+        message?: string;
+    };
 }
 
 function BranchTypeBadge({ type }: { type: string }) {
@@ -48,7 +52,7 @@ function paginationLabel(label: string) {
 }
 
 export default function Index() {
-    const { branches, filters } = usePage<PageProps & Record<string, unknown>>().props as unknown as PageProps;
+    const { flash,branches, filters } = usePage<PageProps & Record<string, unknown>>().props as unknown as PageProps;
     const { processing, delete: destroyForm } = useForm();
     const [search, setSearch] = useState(filters?.search ?? '');
 
@@ -75,6 +79,16 @@ export default function Index() {
             <Head title="Branches" />
 
             <div className="p-6">
+                {flash.message && (
+                    <div className="mb-4">
+                        <Alert>
+                            <Megaphone />
+                            <AlertTitle>Notification</AlertTitle>
+                            <AlertDescription>{flash.message}</AlertDescription>
+                        </Alert>
+                    </div>
+                )}
+
                 <div className="mb-6 flex items-center justify-between">
                     <h1 className="text-3xl font-extrabold tracking-tight text-ink">
                         Branches
@@ -102,7 +116,7 @@ export default function Index() {
                     <Table>
                         <TableHeader>
                             <TableRow className="border-b border-[#f0ddc8] bg-[#fbead9] hover:bg-[#fbead9]">
-                                 <TableHead className="font-bold tracking-wide text-brand-orange-hover">
+                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">
                                     Name
                                 </TableHead>
                                 <TableHead className="font-bold tracking-wide text-brand-orange-hover">
@@ -130,7 +144,7 @@ export default function Index() {
                                     key={branch.id}
                                     className="border-b border-[#f0ddc8] last:border-0 hover:bg-[#fbf3e8]"
                                 >
-                                     <TableCell className="font-medium text-[#7a3b12]">
+                                    <TableCell className="font-medium text-[#7a3b12]">
                                         {branch.name}
                                     </TableCell>
                                     <TableCell className="font-medium text-[#7a3b12]">
@@ -180,8 +194,8 @@ export default function Index() {
                                     key={i}
                                     href={link.url ?? '#'}
                                     className={`flex items-center rounded-md px-3 py-1 text-sm ${link.active
-                                            ? 'bg-brand-orange text-white'
-                                            : 'text-brand-orange-hover hover:bg-[#fbead9]'
+                                        ? 'bg-brand-orange text-white'
+                                        : 'text-brand-orange-hover hover:bg-[#fbead9]'
                                         } ${!link.url ? 'pointer-events-none opacity-40' : ''}`}
                                 >
                                     {paginationLabel(link.label)}
