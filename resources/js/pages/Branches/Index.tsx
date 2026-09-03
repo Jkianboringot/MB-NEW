@@ -32,6 +32,7 @@ interface PageProps {
     filters: { search?: string };
     flash: {
         message?: string;
+         error?: string;
     };
 }
 
@@ -88,6 +89,15 @@ export default function Index() {
                         </Alert>
                     </div>
                 )}
+                   {flash?.erroe && (
+                <div className="mb-4">
+                    <Alert variant="destructive">
+                        <Megaphone />
+                        <AlertTitle>Error</AlertTitle>
+                        <AlertDescription>{flash.error}</AlertDescription>
+                    </Alert>
+                </div>
+            )}
 
                 <div className="mb-6 flex items-center justify-between">
                     <h1 className="text-3xl font-extrabold tracking-tight text-ink">
