@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Link, router, usePage } from '@inertiajs/react';
+import { Link, router, useForm, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { ArrowDownCircle, ArrowUpCircle, ChevronLeft, ChevronRight, Megaphone, Search } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, ChevronLeft, ChevronRight, Megaphone, Pencil, Search, Trash2 } from 'lucide-react';
 import {
     Table,
     TableBody,
@@ -12,7 +12,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { createIn, createOut, index as inventoriesIndex } from '@/routes/inventories';
+import { createIn, createOut, deleteMethod, edit, index as inventoriesIndex } from '@/routes/inventories';
 
 interface InventoryRow {
     id: number;
@@ -48,6 +48,7 @@ function paginationLabel(label: string) {
 export default function Index() {
     const { inventories, filters, flash } = usePage<PageProps & Record<string, unknown>>().props as unknown as PageProps;
     const [search, setSearch] = useState(filters?.search ?? '');
+    const { processing, delete: destroyForm } = useForm();
 
     // Inventories are paginated server-side, so search has to round-trip
     // to the server too — client-side filtering would only ever search
@@ -61,6 +62,11 @@ export default function Index() {
         );
     }
 
+    const handleDelete = (id: number, name: string) => {
+        if (confirm(`Delete "${name}"? This can't be undone.`)) {
+            destroyForm(deleteMethod(id).url);
+        }
+    }; 
     return (
         <div className="p-6">
             {flash?.success && (
@@ -126,6 +132,7 @@ export default function Index() {
                             <TableHead className="text-right">Cash on Hand</TableHead>
                             <TableHead className="text-right">Total Cash</TableHead>
                             <TableHead>Date</TableHead>
+                            <TableHead>Action</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -144,11 +151,11 @@ export default function Index() {
                                 <TableCell className="text-subtle">{inv.id}</TableCell>
                                 <TableCell>
                                     <span
-                                        className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                                            inv.inventory_type === 'IN'
-                                                ? 'bg-green-100 text-green-700'
-                                                : 'bg-red-100 text-red-700'
-                                        }`}
+                                        className={`inline - flex rounded - full px - 2 py - 0.5 text - xs font - medium ${
+        inv.inventory_type === 'IN'
+        ? 'bg-green-100 text-green-700'
+        : 'bg-red-100 text-red-700'
+    } `}
                                     >
                                         {inv.inventory_type}
                                     </span>
@@ -157,12 +164,32 @@ export default function Index() {
                                 <TableCell>{inv.stock_movement_type ?? '—'}</TableCell>
                                 <TableCell>{inv.encoder ?? '—'}</TableCell>
                                 <TableCell className="text-right">
-                                    {inv.cash_amount !== null ? `₱${inv.cash_amount}` : '—'}
+                                    {inv.cash_amount !== null ? `₱${ inv.cash_amount } ` : '—'}
                                 </TableCell>
                                 <TableCell className="text-right font-medium text-[#7a3b12]">
-                                    {inv.net_cash !== null ? `₱${inv.net_cash}` : '—'}
+                                    {inv.net_cash !== null ? `₱${ inv.net_cash } ` : '—'}
                                 </TableCell>
                                 <TableCell className="text-subtle">{inv.created_at}</TableCell>
+                                <TableCell>
+                                    <div className="flex items-center justify-end gap-4">
+                                        <Link
+                                            href={edit(inv.id).url}
+                                            className="flex items-center gap-1 text-sm font-medium text-ink hover:text-brand-orange"
+                                        >
+                                            <Pencil className="h-4 w-4" />
+                                            Edit
+                                        </Link>
+                                        <button
+                                            type="button"
+                                            disabled={processing}
+                                            onClick={() => handleDelete(inv.id, inv.name)}
+                                            className="flex items-center gap-1 text-sm font-medium text-ink hover:text-danger disabled:opacity-50"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                            Delete
+                                        </button>
+                                    </div>
+                                </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
@@ -174,11 +201,11 @@ export default function Index() {
                             <Link
                                 key={i}
                                 href={link.url ?? '#'}
-                                className={`flex items-center rounded-md px-3 py-1 text-sm ${
-                                    link.active
-                                        ? 'bg-brand-orange text-white'
-                                        : 'text-brand-orange-hover hover:bg-[#fbead9]'
-                                } ${!link.url ? 'pointer-events-none opacity-40' : ''}`}
+                                className={`flex items - center rounded - md px - 3 py - 1 text - sm ${
+        link.active
+        ? 'bg-brand-orange text-white'
+        : 'text-brand-orange-hover hover:bg-[#fbead9]'
+    } ${ !link.url ? 'pointer-events-none opacity-40' : '' } `}
                             >
                                 {paginationLabel(link.label)}
                             </Link>

@@ -38,6 +38,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->name('create-out');
             Route::post('/out', [InventoryController::class, 'storeOut'])
                 ->name('store-out');
+
+            Route::get('/{id}/edit', [InventoryController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [InventoryController::class, 'update'])->name('update');
+
+            Route::delete('/{id}', [InventoryController::class, 'delete'])->name('delete');
+
         }
     );
 
