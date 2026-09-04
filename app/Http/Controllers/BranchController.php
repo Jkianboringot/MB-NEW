@@ -6,6 +6,7 @@ use App\Enums\BranchType;
 use App\Http\Requests\BranchRequest;
 use App\Models\Branch;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules\Enum;
 use Inertia\Inertia;
 use Str;
@@ -13,16 +14,23 @@ use Str;
 class BranchController extends Controller
 {
 
+    //     public function delete(Request $request)
+    // {
+    //     Branch::findOrFail($request->id)->deleteOrFail();
+    //     return redirect()->route('branches.index')->with('message', 'Branch Delete Successfully');
+    // }
     public function delete(Branch $branch)
     {
      try {
+ 
+        
         $branch->deleteOrFail();
     } catch (\Throwable $th) {
         Log::error($th);
-        return back()->with('error', 'Cannot delete this branch — it still has associated inventory or sales records.');
+        return back()->with('message', 'Cannot delete this branch — it still has associated inventory or sales records.');
     }
 
-    return redirect()->route('branches.index')->with('success', 'Branch deleted successfully.');
+    return redirect()->route('branches.index')->with('message', 'Branch deleted successfully.');
 }
     
 
@@ -35,10 +43,11 @@ class BranchController extends Controller
         ]);
     }
 
-    public function store(BranchRequest $request,Branch $branch)
+    public function store(BranchRequest $request)
     {
 
-        $branch->create($request->validated());
+        Branch::create($request->validated());
+        // $product->create($request->validated());
 
         return redirect()->route('branches.index')->with('message', 'Branch Created Successfully');
     }

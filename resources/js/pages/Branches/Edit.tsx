@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CircleAlert } from 'lucide-react';
-import { store } from '@/routes/branches';
+import { update } from '@/routes/branches';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 
@@ -33,7 +33,7 @@ interface Props {
 
 export default function Edit({ branches, branch_types }: Props) {
     // HACK - useForm should have type
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, put, processing, errors } = useForm({
         name: branches.name,
         location: branches?.location,
         branch_type: branches.branch_type,
@@ -41,7 +41,7 @@ export default function Edit({ branches, branch_types }: Props) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(store().url);
+        put(update(branches.id).url);
     };
 
     return (

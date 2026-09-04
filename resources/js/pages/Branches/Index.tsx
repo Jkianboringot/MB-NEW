@@ -89,7 +89,7 @@ export default function Index() {
                         </Alert>
                     </div>
                 )}
-                   {flash?.erroe && (
+                   {flash.error && (
                 <div className="mb-4">
                     <Alert variant="destructive">
                         <Megaphone />
