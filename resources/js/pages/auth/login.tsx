@@ -95,14 +95,6 @@ export default function Login({ status }: { status?: string }) {
                     </button>
                 </form>
 
-                <div className="mt-5 text-center">
-
-                    <a href="/forgot-password"
-                        className="text-xs font-medium text-subtle hover:text-brand-orange hover:underline"
-                    >
-                        Forgot your password?
-                    </a>
-                </div>
             </div>
         </div>
     );
