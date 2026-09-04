@@ -17,8 +17,8 @@ return new class extends Migration {
             $table->string('inventory_type', 20)->default(InOutType::In->value);
             //TODO - ondelete
             //will put this on null for now , to show client shit
-            $table->foreignId('encoder_id')->nullable()->constrained('users');
-            $table->foreignId('branch_id')->nullable()->constrained();
+            $table->foreignId('encoder_id')->constrained('users');
+            $table->foreignId('branch_id')->constrained();
 
             //WHY  Okay, I'm here to explain why I'm adding stock_movement_id to the inventory table. The way it would work is that we first create the stock movement so that we can get its ID, which we can then put into the inventory table.
 
