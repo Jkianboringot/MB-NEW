@@ -21,6 +21,7 @@ interface Branch {
     name: string;
     branch_type: string;
     products_count: number;
+    total_sales: number;
 }
 
 interface PaginatedBranches {
@@ -122,6 +123,9 @@ export default function Index() {
                                 <TableHead className="font-bold tracking-wide text-brand-orange-hover">
                                     PRODUCTS
                                 </TableHead>
+                                <TableHead className="font-bold tracking-wide text-brand-orange-hover">
+                                    SALES
+                                </TableHead>
                                 <TableHead className="text-right">Action</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -148,6 +152,12 @@ export default function Index() {
                                         <BranchTypeBadge type={branch.branch_type} />
                                     </TableCell>
                                     <TableCell>{branch.products_count}</TableCell>
+                                    <TableCell className="font-medium text-[#7a3b12] text-right" >
+                                    {branch.total_sales !== null ? `₱${branch.total_sales} ` : '—'}
+                                      
+                                    </TableCell>
+
+
                                     <TableCell>
                                         <div className="flex items-center justify-end gap-4">
                                             <Link

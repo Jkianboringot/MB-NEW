@@ -16,7 +16,9 @@ class Branch extends Model
   //   return $this->belongsToMany(Ingredient::class, 'ingredient_branchs');
   // }
 
-
+protected $casts = [
+    'total_sales' => 'float',
+];
 
   public function inventories(): HasMany
   {
@@ -39,5 +41,11 @@ class Branch extends Model
     return $this->belongsToMany(Product::class)
       ->withPivot('quantity');
   }
+
+  public function sales(){
+    return $this->hasMany(Sale::class);
+  }
+
+
 
 }

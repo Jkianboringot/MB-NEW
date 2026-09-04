@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\BranchType;
 use App\Http\Requests\BranchRequest;
 use App\Models\Branch;
+use App\Models\Sale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules\Enum;
@@ -140,9 +141,16 @@ class BranchController extends Controller
             'products' => $products,
         ]);
     }
+
     public function index(Request $request)
     {
-        $branches = Branch::withCount('products')
+        $branches = Branch::query()
+            ->withCount('products')
+            ->selectSub(
+              Sale::selectRaw('COALESCE(SUM(net_cash), 0)')
+                    ->whereColumn('branch_id', 'branches.id'),
+                'total_sales'
+            )
             ->when($request->string('search')->trim(), function ($query, $search) {
                 $query->where('location', 'like', "%{$search}%");
             })
