@@ -18,7 +18,7 @@ class SecurityController extends Controller
     public function edit(TwoFactorAuthenticationRequest $request): Response
     {
         $props = [
-            'passwordRules' => Password::defaults()->toPasswordRulesString(),
+           'passwordRules' => __('Minimum 8 characters.'),
         ];
 
         return Inertia::render('settings/security', $props);
