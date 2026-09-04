@@ -24,7 +24,7 @@ class BranchController extends Controller
 
     return redirect()->route('branches.index')->with('success', 'Branch deleted successfully.');
 }
-    }
+    
 
 
     public function create()
@@ -35,11 +35,11 @@ class BranchController extends Controller
         ]);
     }
 
-    public function store(BranchRequest $request)
+    public function store(BranchRequest $request,Branch $branch)
     {
-        $request->validated();
 
-        Branch::create($request->validated());
+        $branch->create($request->validated());
+
         return redirect()->route('branches.index')->with('message', 'Branch Created Successfully');
     }
 
