@@ -15,8 +15,15 @@ class BranchController extends Controller
 
     public function delete(Branch $branch)
     {
-        Branch::findOrFail($branch->id)->deleteOrFail();
-        return redirect()->route('branches.index')->with('message', 'Branch Delete Successfully');
+     try {
+        $branch->deleteOrFail();
+    } catch (\Throwable $th) {
+        Log::error($th);
+        return back()->with('error', 'Cannot delete this branch — it still has associated inventory or sales records.');
+    }
+
+    return redirect()->route('branches.index')->with('success', 'Branch deleted successfully.');
+}
     }
 
 
