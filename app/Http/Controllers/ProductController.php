@@ -17,9 +17,16 @@ class ProductController extends Controller
         return Inertia::render('Products/Create', []);
     }
 
-    public function store(ProductRequest $request,Product $product)
+    public function store(ProductRequest $request)
     {
-        $product->create($request->validated());
+        try {
+            $product = Product::create($request->validated());
+
+        } catch (\Throwable $th) {
+            Log::error($th);
+            return back()->with('message', 'Failed to create product.');
+        }
+        // dd($product,$request);
         return redirect()->route('products.index')->with('message', 'Product Created Successfully');
     }
 
@@ -29,10 +36,10 @@ class ProductController extends Controller
             $product->deleteOrFail();
         } catch (\Throwable $th) {
             Log::error($th);
-            return back()->with('error', 'Cannot delete this product — it still has associated inventory or sales records.');
+            return back()->with('message', 'Cannot delete this product — it still has associated inventory or sales records.');
         }
 
-        return redirect()->route('products.index')->with('success', 'Product deleted successfully.');
+        return redirect()->route('products.index')->with('message', 'Product deleted successfully.');
     }
 
 
@@ -44,7 +51,7 @@ class ProductController extends Controller
         //     'name' => 'required',
         //     'price' => 'required',
         // ]);
-
+        // dd($product);
 
         return Inertia::render('Products/Edit', ['products' => $product]);
 
@@ -53,14 +60,16 @@ class ProductController extends Controller
     public function update(ProductRequest $request, Product $product)
     {
 
-        // i have this thing so i dont have to do validation exists on id, and i do this first
-        //becuase if it finds something validate it if not dont even bother validating anything
-        // $p = Product::findOrFail($request->id);
-
-
-        $product->update($request->validated());
-
+        try {
+            $product->update($request->validated());
+        } catch (\Throwable $th) {
+            Log::error($th);
+            return back()->with('message', 'Failed to update product.');
+        }
+        // dd($product,$request);
         return redirect()->route('products.index')->with('message', 'Product Update Successfully');
+
+
 
     }
 
@@ -85,7 +94,7 @@ class ProductController extends Controller
 
     public function index(SearchRequest $request)
     {
-        $request->validated();
+        // $request->validated();//not really being use delete
         $products = Product::query()
             ->when($request->string('search')->trim(), function ($query, $search) {
                 $query->where('name', 'like', "{$search}%");
