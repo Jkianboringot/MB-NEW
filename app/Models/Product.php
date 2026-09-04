@@ -12,7 +12,7 @@ class Product extends Model
 
   use HasFactory;
 
-  public $fillable = ['name', 'price'];
+  public $fillable = ['name', 'price','cost'];
 
   // protected $fillable = ['name','unit_cost','description','status','category_id','is_active'];
 
