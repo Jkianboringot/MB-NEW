@@ -1,4 +1,4 @@
-import { useForm } from '@inertiajs/react';
+import { useForm, usePage } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/select';
 import { Plus, Trash2 } from 'lucide-react';
 import { inUpdate } from '@/routes/inventories';
+import FlashAlerts from '@/components/flash-alerts';
 
 interface Branch {
     id: number;
@@ -45,6 +46,8 @@ interface Props {
 }
 
 export default function EditIn({ inventory, branches, products, stockMovementTypes }: Props) {
+         const { flash } = usePage<{ flash: { message?: string; error?: string } }>().props;
+    
     const { data, setData, put, processing, errors } = useForm<{
         branch_id: number | '';
         stock_movement_type: string;
@@ -81,6 +84,8 @@ export default function EditIn({ inventory, branches, products, stockMovementTyp
 
     return (
         <div className="p-6">
+                        <FlashAlerts flash={flash} />
+            
             <div className="mb-6">
                 <h1 className="text-3xl font-extrabold tracking-tight text-ink">Edit Inventory In</h1>
             </div>

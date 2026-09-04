@@ -1,4 +1,4 @@
-import { useForm } from '@inertiajs/react';
+import { useForm, usePage } from '@inertiajs/react';
 import { FormEvent, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/select';
 import { Plus, Trash2 } from 'lucide-react';
 import { storeOut } from '@/routes/inventories';
+import FlashAlerts from '@/components/flash-alerts';
 
 interface Product {
     id: number;
@@ -42,6 +43,8 @@ interface Props {
 }
 
 export default function CreateOut({ branches, stockMovementTypes, shifts }: Props) {
+         const { flash } = usePage<{ flash: { message?: string; error?: string } }>().props;
+
     // HACK - the shift, and stockMovementType needs to be the data type but i will skip it for now, because
     // backend return value, label — in the future make it directly check from enum
     const { data, setData, post, processing, errors } = useForm<{
@@ -137,6 +140,8 @@ export default function CreateOut({ branches, stockMovementTypes, shifts }: Prop
 
     return (
         <div className="p-6">
+                        <FlashAlerts flash={flash} />
+            
             <div className="mb-6">
                 <h1 className="text-3xl font-extrabold tracking-tight text-ink">Inventory Out</h1>
             </div>

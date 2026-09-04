@@ -13,6 +13,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { createIn, createOut, deleteMethod, editIn, editOut, index as inventoriesIndex } from '@/routes/inventories';
+import FlashAlerts from '@/components/flash-alerts';
 interface InventoryRow {
     id: number;
     type: string;
@@ -33,7 +34,7 @@ interface PaginatedInventories {
 interface PageProps {
     inventories: PaginatedInventories;
     filters: { search?: string };
-    flash?: { success?: string; error?: string };
+    flash?: { message?: string; error?: string };
 }
 
 // Laravel's paginator labels are always one of these three shapes —
@@ -68,24 +69,8 @@ export default function Index() {
     };
     return (
         <div className="p-6">
-            {flash?.success && (
-                <div className="mb-4">
-                    <Alert>
-                        <Megaphone />
-                        <AlertTitle>Notification</AlertTitle>
-                        <AlertDescription>{flash.success}</AlertDescription>
-                    </Alert>
-                </div>
-            )}
-            {flash?.error && (
-                <div className="mb-4">
-                    <Alert variant="destructive">
-                        <Megaphone />
-                        <AlertTitle>Error</AlertTitle>
-                        <AlertDescription>{flash.error}</AlertDescription>
-                    </Alert>
-                </div>
-            )}
+            <FlashAlerts flash={flash} />
+
 
             <div className="mb-6 flex items-center justify-between">
                 <div>

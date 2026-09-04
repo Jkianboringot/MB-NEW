@@ -1,4 +1,4 @@
-import { useForm } from '@inertiajs/react';
+import { useForm, usePage } from '@inertiajs/react';
 import { FormEvent, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/select';
 import { Plus, Trash2 } from 'lucide-react';
 import { updateOut } from '@/routes/inventories';
+import FlashAlerts from '@/components/flash-alerts';
 
 interface Product {
     id: number;
@@ -21,7 +22,7 @@ interface Product {
 
 interface Branch {
     id: number;
-location: string|null;
+    location: string | null;
     products: Product[];
 }
 
@@ -38,14 +39,14 @@ interface SelectOption {
 interface InventoryOut {
     id: number;
     branch_id: number;
-    stock_movement_type: string|null;
+    stock_movement_type: string | null;
     productList: ProductRow[];
     shift: string;
     cash_amount: number;
-    cash_shortage: number|null;
-    gcash_amount: number|null;
-    cash_advance: number|null;
-    remitted_expenses: number|null;
+    cash_shortage: number | null;
+    gcash_amount: number | null;
+    cash_advance: number | null;
+    remitted_expenses: number | null;
 }
 
 interface Props {
@@ -56,18 +57,21 @@ interface Props {
 }
 
 export default function EditOut({ inventory, branches, stockMovementTypes, shifts }: Props) {
+         const { flash } = usePage<{ flash: { message?: string; error?: string } }>().props;
+    
+
     // HACK - same as CreateOut: shift / stock_movement_type should be enum-typed once
     // the backend returns something we can check directly against an enum.
     const { data, setData, put, processing, errors } = useForm<{
         branch_id: number | '';
         productList: ProductRow[];
         shift: string;
-        stock_movement_type: string|null;
+        stock_movement_type: string | null;
         cash_amount: number;
-        cash_shortage: number|null;
-        gcash_amount: number|null;
-        cash_advance: number|null;
-        remitted_expenses: number|null;
+        cash_shortage: number | null;
+        gcash_amount: number | null;
+        cash_advance: number | null;
+        remitted_expenses: number | null;
         net_cash: number;
     }>({
         branch_id: inventory.branch_id,
@@ -151,6 +155,8 @@ export default function EditOut({ inventory, branches, stockMovementTypes, shift
 
     return (
         <div className="p-6">
+            <FlashAlerts flash={flash} />
+
             <div className="mb-6">
                 <h1 className="text-3xl font-extrabold tracking-tight text-ink">Edit Inventory Out</h1>
             </div>
