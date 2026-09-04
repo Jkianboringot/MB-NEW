@@ -13,9 +13,9 @@ use Str;
 class BranchController extends Controller
 {
 
-    public function delete(Request $request)
+    public function delete(Branch $branch)
     {
-        Branch::findOrFail($request->id)->deleteOrFail();
+        Branch::findOrFail($branch->id)->deleteOrFail();
         return redirect()->route('branches.index')->with('message', 'Branch Delete Successfully');
     }
 
@@ -32,36 +32,47 @@ class BranchController extends Controller
     {
         $request->validated();
 
-        Branch::create($request->all());
+        Branch::create($request->validated());
         return redirect()->route('branches.index')->with('message', 'Branch Created Successfully');
     }
 
 
 
-    public function edit(Request $request)
+    public function edit(Branch $branch)
     {
-        $p = Branch::findOrFail($request->id);
-
+        // $p = Branch::findOrFail($branch->id);
+        // dd($branch);
         return Inertia::render('Branches/Edit', [
-            'branches' => $p,
+            'branches' => $branch,
             'branch_types' => collect(BranchType::cases())->map(fn($cases) => ['value' => $cases->value, 'label' => Str::headline($cases->name)]),
         ]);
 
     }
 
-    public function update(BranchRequest $request)
-    {
+    // public function update(BranchRequest $request)
+    // {
 
-        $p = Branch::findOrFail($request->id);
+    //     $p = Branch::findOrFail($request->id);
 
-        $request->validated();
+    //     $request->validated();
 
 
-        $p->update($request->all());
+    //     $p->update($request->all());
 
-        return redirect()->route('branches.index')->with('message', 'Branch Update Successfully');
+    //     return redirect()->route('branches.index')->with('message', 'Branch Update Successfully');
 
-    }
+    // }
+
+    public function update(BranchRequest $request, Branch $branch)
+{
+    // this is the summary of how it work:
+    // $branch is model binding, it auto findorFail and it already has error handling too 
+    //the is request is what takes data from body and we update what even branch has with what 
+    // we parse from body, with request form, also its the one that validated shit
+    $branch->update($request->validated());
+
+    return redirect()->route('branches.index')->with('message', 'Branch Updated Successfully');
+}
 
     // ASK-YOURSELF - ask about which of this two is better the top update or this below one
     //   public function update(Request $request,Branch $branch)
