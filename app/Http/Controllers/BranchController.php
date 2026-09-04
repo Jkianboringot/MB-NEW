@@ -21,18 +21,18 @@ class BranchController extends Controller
     // }
     public function delete(Branch $branch)
     {
-     try {
- 
-        
-        $branch->deleteOrFail();
-    } catch (\Throwable $th) {
-        Log::error($th);
-        return back()->with('message', 'Cannot delete this branch — it still has associated inventory or sales records.');
+        try {
+
+
+            $branch->deleteOrFail();
+        } catch (\Throwable $th) {
+            Log::error($th);
+            return back()->with('message', 'Cannot delete this branch — it still has associated inventory or sales records.');
+        }
+
+        return redirect()->route('branches.index')->with('message', 'Branch deleted successfully.');
     }
 
-    return redirect()->route('branches.index')->with('message', 'Branch deleted successfully.');
-}
-    
 
 
     public function create()
@@ -46,10 +46,17 @@ class BranchController extends Controller
     public function store(BranchRequest $request)
     {
 
-        Branch::create($request->validated());
-        // $product->create($request->validated());
+        try {
 
+            Branch::create($request->validated());
+
+        } catch (\Throwable $th) {
+            Log::error($th);
+            return back()->with('message', 'Failed to create branch.');
+        }
+        // dd($product,$request);
         return redirect()->route('branches.index')->with('message', 'Branch Created Successfully');
+
     }
 
 
@@ -80,15 +87,27 @@ class BranchController extends Controller
     // }
 
     public function update(BranchRequest $request, Branch $branch)
-{
-    // this is the summary of how it work:
-    // $branch is model binding, it auto findorFail and it already has error handling too 
-    //the is request is what takes data from body and we update what even branch has with what 
-    // we parse from body, with request form, also its the one that validated shit
-    $branch->update($request->validated());
+    {
 
-    return redirect()->route('branches.index')->with('message', 'Branch Updated Successfully');
-}
+
+        try {
+            // this is the summary of how it work:
+            // $branch is model binding, it auto findorFail and it already has error handling too 
+            //the is request is what takes data from body and we update what even branch has with what 
+            // we parse from body, with request form, also its the one that validated shit
+
+
+            $branch->update($request->validated());
+        } catch (\Throwable $th) {
+            Log::error($th);
+            return back()->with('message', 'Failed to update branch.');
+        }
+        // dd($product,$request);
+        return redirect()->route('branches.index')->with('message', 'Branch Updated Successfully');
+
+
+    }
+
 
     // ASK-YOURSELF - ask about which of this two is better the top update or this below one
     //   public function update(Request $request,Branch $branch)
