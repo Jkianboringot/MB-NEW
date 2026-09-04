@@ -1,10 +1,11 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CircleAlert } from 'lucide-react';
 import { store } from '@/routes/products';
+import FlashAlerts from '@/components/flash-alerts';
 
 
 interface ProductForm {
@@ -13,6 +14,8 @@ interface ProductForm {
     cost: number;
 }
 export default function Create() {
+    const { flash } = usePage<{ flash: { message?: string; error?: string } }>().props;
+
     const { data, setData, post, processing, errors } = useForm<ProductForm>({
         name: '',
         price: 0,
@@ -29,6 +32,8 @@ export default function Create() {
             <Head title="Create New Product" />
 
             <div className="mx-auto w-full  max-w-4xl p-6">
+                <FlashAlerts flash={flash} />
+
                 <div className="mb-4">
                     <h1 className=" text-2xl font-bold text-ink">New Product</h1>
                     <p className="mt-0.5 text-sm text-subtle">
@@ -40,19 +45,7 @@ export default function Create() {
                     onSubmit={handleSubmit}
                     className="space-y-4 rounded-xl border border-[#f0ddc8] bg-white p-5"
                 >
-                    {Object.keys(errors).length > 0 && (
-                        <Alert variant="destructive">
-                            <CircleAlert />
-                            <AlertTitle>Something's not right</AlertTitle>
-                            <AlertDescription>
-                                <ul className="list-inside list-disc text-sm text-danger">
-                                    {Object.entries(errors).map(([key, message]) => (
-                                        <li key={key}>{message as string}</li>
-                                    ))}
-                                </ul>
-                            </AlertDescription>
-                        </Alert>
-                    )}
+
 
                     <div className="space-y-1">
                         <Label htmlFor="name" className="font-semibold text-ink">

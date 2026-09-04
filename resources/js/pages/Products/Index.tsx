@@ -20,6 +20,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { create, deleteMethod, edit, index as productsIndex } from '@/routes/products';
+import FlashAlerts from '@/components/flash-alerts';
 
 interface Product {
     id: number;
@@ -36,7 +37,7 @@ interface PaginatedProducts {
 interface PageProps {
     flash: {
         message?: string;
-         error?: string;
+        error?: string;
     };
     products: PaginatedProducts;
     filters: { search?: string };
@@ -91,25 +92,8 @@ export default function Index() {
         <>
             <Head title="Products" />
 
-                <div className="p-6">
-                    {flash.message && (
-                        <div className="mb-4">
-                            <Alert>
-                                <Megaphone />
-                                <AlertTitle>Notification</AlertTitle>
-                                <AlertDescription>{flash.message}</AlertDescription>
-                            </Alert>
-                        </div>
-                    )}
-                       {flash?.error && (
-                                    <div className="mb-4">
-                                        <Alert variant="destructive">
-                                            <Megaphone />
-                                            <AlertTitle>Error</AlertTitle>
-                                            <AlertDescription>{flash.error}</AlertDescription>
-                                        </Alert>
-                                    </div>
-                                )}
+            <div className="p-6">
+                <FlashAlerts flash={flash} />
 
                 <div className="mb-6 flex items-center justify-between">
                     <h1 className="text-3xl font-extrabold tracking-tight text-ink">
@@ -124,7 +108,7 @@ export default function Index() {
 
                 <div className="overflow-hidden rounded-xl border border-[#f0ddc8] bg-[#fdf8f2]">
                     <div className="flex items-center justify-end gap-3 border-b border-[#f0ddc8] px-5 py-3">
-                         <div className="relative">
+                        <div className="relative">
                             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-orange" />
                             <Input
                                 value={search}
@@ -134,7 +118,7 @@ export default function Index() {
                                 className="w-56 border-brand-orange/40 bg-white pl-9 text-sm"
                             />
                             {search.length >= 100 && (
-                                
+
                                 <p className="absolute left-0 top-full mb-10 text-xs text-danger">
                                     Search can't be longer than 5 characters.
                                 </p>
@@ -204,11 +188,10 @@ export default function Index() {
                                 <Link
                                     key={i}
                                     href={link.url ?? '#'}
-                                    className={`flex items-center rounded-md px-3 py-1 text-sm ${
-                                        link.active
+                                    className={`flex items-center rounded-md px-3 py-1 text-sm ${link.active
                                             ? 'bg-brand-orange text-white'
                                             : 'text-brand-orange-hover hover:bg-[#fbead9]'
-                                    } ${!link.url ? 'pointer-events-none opacity-40' : ''}`}
+                                        } ${!link.url ? 'pointer-events-none opacity-40' : ''}`}
                                 >
                                     {paginationLabel(link.label)}
                                 </Link>

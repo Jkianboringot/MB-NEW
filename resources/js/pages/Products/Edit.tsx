@@ -1,10 +1,11 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CircleAlert } from 'lucide-react';
 import { update } from '@/routes/products';
+import FlashAlerts from '@/components/flash-alerts';
 
 interface Product {
     id: number;
@@ -18,6 +19,8 @@ interface Props {
 }
 
 export default function Edit({ products }: Props) {
+         const { flash } = usePage<{ flash: { message?: string; error?: string } }>().props;
+    
     const { data, setData, put, processing, errors } = useForm({
         name: products.name,
         price: products.price,
@@ -34,6 +37,7 @@ export default function Edit({ products }: Props) {
             <Head title="Edit Product" />
 
             <div className="mx-auto w-full  max-w-4xl p-6">
+                <FlashAlerts flash={flash} />
 
                 <div className="mb-4">
                     <h1 className="text-2xl font-bold text-ink">Edit Product</h1>
