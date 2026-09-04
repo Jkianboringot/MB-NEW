@@ -13,6 +13,7 @@ import {
 import { Box, ChevronLeft, ChevronRight, Megaphone, Pencil, Search, Trash2 } from 'lucide-react';
 import { deleteMethod, index as branchesIndex, products, edit } from '@/routes/branches';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import FlashAlerts from '@/components/flash-alerts';
 
 interface Branch {
     id: number;
@@ -32,7 +33,7 @@ interface PageProps {
     filters: { search?: string };
     flash: {
         message?: string;
-         error?: string;
+        error?: string;
     };
 }
 
@@ -53,7 +54,7 @@ function paginationLabel(label: string) {
 }
 
 export default function Index() {
-    const { flash,branches, filters } = usePage<PageProps & Record<string, unknown>>().props as unknown as PageProps;
+    const { flash, branches, filters } = usePage<PageProps & Record<string, unknown>>().props as unknown as PageProps;
     const { processing, delete: destroyForm } = useForm();
     const [search, setSearch] = useState(filters?.search ?? '');
 
@@ -80,24 +81,7 @@ export default function Index() {
             <Head title="Branches" />
 
             <div className="p-6">
-                {flash.message && (
-                    <div className="mb-4">
-                        <Alert>
-                            <Megaphone />
-                            <AlertTitle>Notification</AlertTitle>
-                            <AlertDescription>{flash.message}</AlertDescription>
-                        </Alert>
-                    </div>
-                )}
-                   {flash.error && (
-                <div className="mb-4">
-                    <Alert variant="destructive">
-                        <Megaphone />
-                        <AlertTitle>Error</AlertTitle>
-                        <AlertDescription>{flash.error}</AlertDescription>
-                    </Alert>
-                </div>
-            )}
+                <FlashAlerts flash={flash} />
 
                 <div className="mb-6 flex items-center justify-between">
                     <h1 className="text-3xl font-extrabold tracking-tight text-ink">

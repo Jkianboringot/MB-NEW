@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -6,7 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CircleAlert } from 'lucide-react';
 import { update } from '@/routes/branches';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
+import FlashAlerts from '@/components/flash-alerts';
 
 interface Branch {
     id: number;
@@ -38,6 +38,7 @@ export default function Edit({ branches, branch_types }: Props) {
         location: branches?.location,
         branch_type: branches.branch_type,
     });
+      const { flash } = usePage<{ flash: { message?: string; error?: string } }>().props;
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -49,6 +50,7 @@ export default function Edit({ branches, branch_types }: Props) {
             <Head title="Edit Branch" />
 
             <div className="mx-auto w-full  max-w-4xl p-6">
+                 <FlashAlerts flash={flash} />
                 <div className="mb-4">
                     <h1 className="text-2xl font-bold text-ink">Edit Product</h1>
                     <p className="mt-0.5 text-sm text-subtle">

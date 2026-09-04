@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm ,usePage} from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,6 +7,7 @@ import { CircleAlert } from 'lucide-react';
 import { store } from '@/routes/branches';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
+import FlashAlerts from '@/components/flash-alerts';
 
 interface BranchForm {
     name: string;
@@ -30,6 +31,7 @@ interface Props{
 
 
 export default function Create({ branch_types }:Props) {
+     const { flash } = usePage<{ flash: { message?: string; error?: string } }>().props;
     const { data, setData, post, processing, errors } = useForm<BranchForm>({
         name: '',
         location: '',
@@ -46,6 +48,7 @@ export default function Create({ branch_types }:Props) {
             <Head title="Create New Branch" />
 
             <div className="mx-auto w-full  max-w-4xl p-6">
+                  <FlashAlerts flash={flash} />
                 <div className="mb-4">
                     <h1 className=" text-2xl font-bold text-ink">New Branch</h1>
                     <p className="mt-0.5 text-sm text-subtle">

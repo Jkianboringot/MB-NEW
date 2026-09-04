@@ -27,7 +27,7 @@ class BranchController extends Controller
             $branch->deleteOrFail();
         } catch (\Throwable $th) {
             Log::error($th);
-            return back()->with('message', 'Cannot delete this branch — it still has associated inventory or sales records.');
+            return back()->with('error', 'Cannot delete this branch — it still has associated inventory or sales records.');
         }
 
         return redirect()->route('branches.index')->with('message', 'Branch deleted successfully.');
@@ -52,7 +52,7 @@ class BranchController extends Controller
 
         } catch (\Throwable $th) {
             Log::error($th);
-            return back()->with('message', 'Failed to create branch.');
+            return back()->with('error', 'Failed to create branch.');
         }
         // dd($product,$request);
         return redirect()->route('branches.index')->with('message', 'Branch Created Successfully');
@@ -100,7 +100,7 @@ class BranchController extends Controller
             $branch->update($request->validated());
         } catch (\Throwable $th) {
             Log::error($th);
-            return back()->with('message', 'Failed to update branch.');
+            return back()->with('error', 'Failed to update branch.');
         }
         // dd($product,$request);
         return redirect()->route('branches.index')->with('message', 'Branch Updated Successfully');
