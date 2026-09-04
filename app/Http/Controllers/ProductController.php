@@ -6,6 +6,7 @@ use App\Http\Requests\ProductRequest;
 use App\Http\Requests\SearchRequest;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class ProductController extends Controller
@@ -16,29 +17,28 @@ class ProductController extends Controller
         return Inertia::render('Products/Create', []);
     }
 
-    public function store(ProductRequest $request)
+    public function store(ProductRequest $request,Product $product)
     {
-        $request->validated();
-
-        Product::create($request->all());
+        $product->create($request->validated());
         return redirect()->route('products.index')->with('message', 'Product Created Successfully');
     }
 
-    public function delete(Request  $request)
+    public function delete(Product $product)
     {
-        // $request
-        // dont really need validatoin here since we are just to check for id, if it fail dont 
-        // do shit if we do find delete
+        try {
+            $product->deleteOrFail();
+        } catch (\Throwable $th) {
+            Log::error($th);
+            return back()->with('error', 'Cannot delete this product — it still has associated inventory or sales records.');
+        }
 
-        // make sure it cannot be delete if it has quantity
-        //and the race condition consider that, you cannot delete shit that is delete by other
-        Product::findOrFail($request->id)->deleteOrFail();
-        return redirect()->route('products.index')->with('message', 'Product Delete Successfully');
+        return redirect()->route('products.index')->with('success', 'Product deleted successfully.');
     }
 
-    public function edit(Request $request)
+
+    public function edit(Product $product)
     {
-        $p = Product::findOrFail($request->id);
+        // $p = Product::findOrFail($request->id);
 
         // $request->validate([
         //     'name' => 'required',
@@ -46,21 +46,21 @@ class ProductController extends Controller
         // ]);
 
 
-        return Inertia::render('Products/Edit', ['products' => $p]);
+        return Inertia::render('Products/Edit', ['products' => $product]);
 
     }
 
-    public function update(ProductRequest $request)
+    public function update(ProductRequest $request, Product $product)
     {
 
         // i have this thing so i dont have to do validation exists on id, and i do this first
         //becuase if it finds something validate it if not dont even bother validating anything
-        $p = Product::findOrFail($request->id);
-        $request->validated(); 
+        // $p = Product::findOrFail($request->id);
 
-        $p->update($request->all());
 
-        return redirect()->route('products.index')->with('message', 'PRoduct Delete Successfully');
+        $product->update($request->validated());
+
+        return redirect()->route('products.index')->with('message', 'Product Update Successfully');
 
     }
 
@@ -90,7 +90,7 @@ class ProductController extends Controller
             ->when($request->string('search')->trim(), function ($query, $search) {
                 $query->where('name', 'like', "{$search}%");
             })
-            ->orderBy('created_at','desc')
+            ->orderBy('created_at', 'desc')
 
             ->paginate(15)
             ->withQueryString();
