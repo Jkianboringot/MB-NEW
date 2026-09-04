@@ -24,7 +24,7 @@ class ProductController extends Controller
 
         } catch (\Throwable $th) {
             Log::error($th);
-            return back()->with('message', 'Failed to create product.');
+            return back()->with('error', 'Failed to create product.');
         }
         // dd($product,$request);
         return redirect()->route('products.index')->with('message', 'Product Created Successfully');
@@ -36,7 +36,7 @@ class ProductController extends Controller
             $product->deleteOrFail();
         } catch (\Throwable $th) {
             Log::error($th);
-            return back()->with('message', 'Cannot delete this product — it still has associated inventory or sales records.');
+            return back()->with('error', 'Cannot delete this product — it still has associated inventory or sales records.');
         }
 
         return redirect()->route('products.index')->with('message', 'Product deleted successfully.');
@@ -64,7 +64,7 @@ class ProductController extends Controller
             $product->update($request->validated());
         } catch (\Throwable $th) {
             Log::error($th);
-            return back()->with('message', 'Failed to update product.');
+            return back()->with('error', 'Failed to update product.');
         }
         // dd($product,$request);
         return redirect()->route('products.index')->with('message', 'Product Update Successfully');
