@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Sale;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class SaleController extends Controller
@@ -25,14 +26,22 @@ class SaleController extends Controller
     //     return redirect()->route('sales.index')->with('message', 'Sale Created Successfully');
     // }
 
-    public function delete(Request $request)
+    public function delete(Sale $sale)
     {
-        $request->validate([
-            'id' => ['required', 'exists:sales,id']
-        ]);
 
-        Sale::findOrFail($request->id)->deleteOrFail();
+
+
+        try {
+
+            $sale->deleteOrFail();
+
+        } catch (\Throwable $th) {
+            Log::error($th);
+            return back()->with('message', 'Cannot delete this sale — it still has associated inventory or branch records.');
+        }
+
         return redirect()->route('sales.index')->with('message', 'Sale Delete Successfully');
+
     }
 
     public function edit(Request $request)

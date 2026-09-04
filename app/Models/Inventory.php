@@ -28,4 +28,8 @@ class Inventory extends Model
         return $this->belongsTo(User::class, 'encoder_id');
     }
 
+    public function items()
+    {
+        return $this->hasMany(InventoryItem::class);
+    }
 }

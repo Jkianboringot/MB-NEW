@@ -11,7 +11,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Plus, Trash2 } from 'lucide-react';
-import { createIn, storeIn } from '@/routes/inventories';
+import { inUpdate } from '@/routes/inventories';
 
 interface Branch {
     id: number;
@@ -30,21 +30,30 @@ interface ProductRow {
     quantity: number;
 }
 
+interface InventoryIn {
+    id: number;
+    branch_id: number;
+    stock_movement_type: string;
+    productList: ProductRow[];
+}
+
 interface Props {
+    inventory: InventoryIn;
     branches: Branch[];
     products: Product[];
     stockMovementTypes: { value: string; label: string }[];
 }
 
-export default function CreateIn({ branches, products, stockMovementTypes }: Props) {
-    const { data, setData, post, processing, errors } = useForm<{
+export default function EditIn({ inventory, branches, products, stockMovementTypes }: Props) {
+    const { data, setData, put, processing, errors } = useForm<{
         branch_id: number | '';
         stock_movement_type: string;
         productList: ProductRow[];
     }>({
-        branch_id: '',
-        stock_movement_type: 'delivery',
-        productList: [{ product_id: '', quantity: 1 }],
+        branch_id: inventory.branch_id,
+        stock_movement_type: inventory.stock_movement_type,
+        // fall back to one empty row if, for some reason, the record has no items
+        productList: inventory.productList.length > 0 ? inventory.productList : [{ product_id: '', quantity: 1 }],
     });
 
     function addRow() {
@@ -66,14 +75,14 @@ export default function CreateIn({ branches, products, stockMovementTypes }: Pro
 
     function submit(e: FormEvent) {
         e.preventDefault();
-        
-        post(storeIn().url);
+
+        put(inUpdate(inventory.id).url);
     }
 
     return (
         <div className="p-6">
             <div className="mb-6">
-                <h1 className="text-3xl font-extrabold tracking-tight text-ink">Inventory In</h1>
+                <h1 className="text-3xl font-extrabold tracking-tight text-ink">Edit Inventory In</h1>
             </div>
 
             <form onSubmit={submit} className="w-full">
@@ -185,7 +194,7 @@ export default function CreateIn({ branches, products, stockMovementTypes }: Pro
                     {/* Actions */}
                     <div className="flex justify-end border-t border-[#f0ddc8] bg-white/60 px-6 py-4">
                         <Button type="submit" disabled={processing} className="bg-green-600 font-bold text-white hover:bg-green-700">
-                            {processing ? 'Saving…' : 'Save Stock In'}
+                            {processing ? 'Saving…' : 'Update Stock In'}
                         </Button>
                     </div>
                 </div>

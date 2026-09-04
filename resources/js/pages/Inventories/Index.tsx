@@ -12,8 +12,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { createIn, createOut, deleteMethod, edit, index as inventoriesIndex } from '@/routes/inventories';
-
+import { createIn, createOut, deleteMethod, editIn, editOut, index as inventoriesIndex } from '@/routes/inventories';
 interface InventoryRow {
     id: number;
     type: string;
@@ -62,11 +61,11 @@ export default function Index() {
         );
     }
 
-    const handleDelete = (id: number, name: string) => {
-        if (confirm(`Delete "${name}"? This can't be undone.`)) {
+    const handleDelete = (id: number, label: string) => {
+        if (confirm(`Delete "${label}"? This can't be undone.`)) {
             destroyForm(deleteMethod(id).url);
         }
-    }; 
+    };
     return (
         <div className="p-6">
             {flash?.success && (
@@ -151,11 +150,10 @@ export default function Index() {
                                 <TableCell className="text-subtle">{inv.id}</TableCell>
                                 <TableCell>
                                     <span
-                                        className={`inline - flex rounded - full px - 2 py - 0.5 text - xs font - medium ${
-        inv.inventory_type === 'IN'
-        ? 'bg-green-100 text-green-700'
-        : 'bg-red-100 text-red-700'
-    } `}
+                                        className={`inline - flex rounded - full px - 2 py - 0.5 text - xs font - medium ${inv.inventory_type === 'IN'
+                                            ? 'bg-green-100 text-green-700'
+                                            : 'bg-red-100 text-red-700'
+                                            } `}
                                     >
                                         {inv.inventory_type}
                                     </span>
@@ -164,16 +162,16 @@ export default function Index() {
                                 <TableCell>{inv.stock_movement_type ?? '—'}</TableCell>
                                 <TableCell>{inv.encoder ?? '—'}</TableCell>
                                 <TableCell className="text-right">
-                                    {inv.cash_amount !== null ? `₱${ inv.cash_amount } ` : '—'}
+                                    {inv.cash_amount !== null ? `₱${inv.cash_amount} ` : '—'}
                                 </TableCell>
                                 <TableCell className="text-right font-medium text-[#7a3b12]">
-                                    {inv.net_cash !== null ? `₱${ inv.net_cash } ` : '—'}
+                                    {inv.net_cash !== null ? `₱${inv.net_cash} ` : '—'}
                                 </TableCell>
                                 <TableCell className="text-subtle">{inv.created_at}</TableCell>
                                 <TableCell>
                                     <div className="flex items-center justify-end gap-4">
                                         <Link
-                                            href={edit(inv.id).url}
+                                            href={inv.inventory_type === 'in' ? editIn(inv.id).url : editOut(inv.id).url}
                                             className="flex items-center gap-1 text-sm font-medium text-ink hover:text-brand-orange"
                                         >
                                             <Pencil className="h-4 w-4" />
@@ -182,7 +180,7 @@ export default function Index() {
                                         <button
                                             type="button"
                                             disabled={processing}
-                                            onClick={() => handleDelete(inv.id, inv.name)}
+                                            onClick={() => handleDelete(inv.id, inv.branch ?? `#${inv.id}`)}
                                             className="flex items-center gap-1 text-sm font-medium text-ink hover:text-danger disabled:opacity-50"
                                         >
                                             <Trash2 className="h-4 w-4" />
@@ -201,11 +199,10 @@ export default function Index() {
                             <Link
                                 key={i}
                                 href={link.url ?? '#'}
-                                className={`flex items - center rounded - md px - 3 py - 1 text - sm ${
-        link.active
-        ? 'bg-brand-orange text-white'
-        : 'text-brand-orange-hover hover:bg-[#fbead9]'
-    } ${ !link.url ? 'pointer-events-none opacity-40' : '' } `}
+                                className={`flex items - center rounded - md px - 3 py - 1 text - sm ${link.active
+                                    ? 'bg-brand-orange text-white'
+                                    : 'text-brand-orange-hover hover:bg-[#fbead9]'
+                                    } ${!link.url ? 'pointer-events-none opacity-40' : ''} `}
                             >
                                 {paginationLabel(link.label)}
                             </Link>

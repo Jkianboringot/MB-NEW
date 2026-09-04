@@ -51,10 +51,122 @@ class InventoryController extends Controller
         ]);
     }
 
-    /**
-     * Show the "Stock In" form. Product list is open to every product —
-     * a delivery can introduce a new product to a branch.
-     */
+    // i think its better to get the model here
+    // public function edit(Inventory $inventory): Response
+    // {
+
+    //     return Inertia::render('Inventories/CreateIn', [
+
+    //         'stockMovementTypes' => collect(StockMovementType::cases())->map(fn($cases) => ['value' => $cases->value, 'label' => Str::headline($cases->name)]),
+    //         'branches' => Branch::select('id', 'location', 'branch_type')->get(),
+    //         'products' => Product::select('id', 'name', 'price')->get(),
+    //     ]);
+    // }
+
+    public function editIn(Inventory $inventory): Response
+    {
+        // dd($inventory);
+        $inventory->load('items');
+
+        return Inertia::render('Inventories/EditIn', [
+            'inventory' => [
+                'id' => $inventory->id,
+                'branch_id' => $inventory->branch_id,
+                'stock_movement_type' => $inventory->stock_movement_type,
+                'productList' => $inventory->items->map(fn($i) => [
+                    'product_id' => $i->product_id,
+                    'quantity' => $i->quantity,
+                ]),
+            ],
+            'stockMovementTypes' => collect(StockMovementType::cases())->map(fn($c) => ['value' => $c->value, 'label' => Str::headline($c->name)]),
+            'branches' => Branch::select('id', 'location', 'branch_type')->get(),
+            'products' => Product::select('id', 'name', 'price')->get(),
+        ]);
+    }
+
+    public function inUpdate( Inventory $inventory,StoreInInventoryRequest $request): RedirectResponse
+    {
+// dd('hisd');
+
+        $data = $request->validated();
+        $inv = $this->inventoryService->inventoryUpdateIn($inventory, [
+            'branch_id' => $data['branch_id'],
+            'inventory' => ['stock_movement_type' => $data['stock_movement_type']],
+            'productList' => $data['productList'],
+        ]);
+
+        if (!$inv) {
+            return back()->with('error', 'Failed to update stock in. Check the logs.');
+        }
+
+        return redirect()->route('inventories.index')->with('success', 'Stock in updated.');
+    }
+
+    public function editOut(Inventory $inventory): Response
+    {
+        $inventory->load(['items', 'sales']);
+
+        $branches = Branch::with('products')->get()->map(fn(Branch $branch) => [
+            'id' => $branch->id,
+            'location' => $branch->location,
+            'products' => $branch->products->map(fn(Product $product) => [
+                'id' => $product->id,
+                'name' => $product->name,
+                'quantity' => $product->pivot->quantity,
+            ]),
+        ]);
+
+        return Inertia::render('Inventories/EditOut', [
+            'inventory' => [
+                'id' => $inventory->id,
+                'branch_id' => $inventory->branch_id,
+                'stock_movement_type' => $inventory->stock_movement_type??'',
+                'productList' => $inventory->items->map(fn($i) => [
+                    'product_id' => $i->product_id,
+                    'quantity' => $i->quantity,
+                ]),
+                'shift' => $inventory->sales->shift??null,
+                'cash_amount' => $inventory->sales->cash_amount,
+                'cash_shortage' => $inventory->sales->cash_shortage??null,
+                'gcash_amount' => $inventory->sales->gcash_amount??null,
+                'cash_advance' => $inventory->sales->cash_advance??null,
+                'remitted_expenses' => $inventory->sales->remitted_expenses??null,
+            ],
+            'shifts' => collect(Shift::cases())->map(fn($c) => ['value' => $c->value, 'label' => Str::headline($c->name)]),
+            'stockMovementTypes' => collect(StockMovementType::cases())->map(fn($c) => ['value' => $c->value, 'label' => Str::headline($c->name)]),
+            'branches' => $branches,
+        ]);
+    }
+
+    public function updateOut(StoreOutInventoryRequest $request, Inventory $inventory)
+    {
+        // dd($request,$inventory);
+        $data = $request->validated();
+
+        $inv = $this->inventoryService->inventoryUpdateOut($inventory, [
+            'branch_id' => $data['branch_id'],
+            'inventory' => ['stock_movement_type' => $data['stock_movement_type']],
+            'productList' => $data['productList'],
+            'sale' => [
+                'shift' => $data['shift'],
+                'cash_amount' => $data['cash_amount'],
+                'gcash_amount' => $data['gcash_amount'],
+                'cash_advance' => $data['cash_advance'],
+                'remitted_expenses' => $data['remitted_expenses'],
+                'cash_shortage' => $data['cash_shortage'] ?? 0,
+                'net_cash' => $data['net_cash'],
+            ],
+        ]);
+
+        if (!$inv) {
+            return back()->with('error', 'Failed to update sale. Check the logs.');
+        }
+
+        return redirect()->route('inventories.index')->with('success', 'Sale updated.');
+    }
+
+
+
     public function createIn(): Response
     {
         return Inertia::render('Inventories/CreateIn', [
@@ -79,7 +191,7 @@ class InventoryController extends Controller
         ]);
 
         if (!$inv) {
-            return back()->with('error', 'Failed to record stock in. Check the logs.');
+            return back()->with('message', 'Failed to record stock in. Check the logs.');
         }
 
         return redirect()
@@ -143,5 +255,18 @@ class InventoryController extends Controller
         return redirect()
             ->route('inventories.index')
             ->with('success', 'Sale recorded.');
+    }
+
+    public function delete(Inventory $inventory): RedirectResponse
+    {
+        $deleted = $this->inventoryService->inventoryDelete($inventory);
+
+        if (!$deleted) {
+            return back()->with('error', 'Failed to delete record. Check the logs.');
+        }
+
+        return redirect()
+            ->route('inventories.index')
+            ->with('success', 'Record deleted.');
     }
 }

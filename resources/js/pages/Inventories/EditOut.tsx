@@ -11,7 +11,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Plus, Trash2 } from 'lucide-react';
-import { storeOut } from '@/routes/inventories';
+import { updateOut } from '@/routes/inventories';
 
 interface Product {
     id: number;
@@ -21,7 +21,7 @@ interface Product {
 
 interface Branch {
     id: number;
-    location: string;
+location: string|null;
     products: Product[];
 }
 
@@ -35,20 +35,32 @@ interface SelectOption {
     label: string;
 }
 
+interface InventoryOut {
+    id: number;
+    branch_id: number;
+    stock_movement_type: string|null;
+    productList: ProductRow[];
+    shift: string;
+    cash_amount: number;
+    cash_shortage: number|null;
+    gcash_amount: number|null;
+    cash_advance: number|null;
+    remitted_expenses: number|null;
+}
+
 interface Props {
+    inventory: InventoryOut;
     branches: Branch[];
     stockMovementTypes: SelectOption[];
     shifts: SelectOption[];
 }
 
-export default function CreateOut({ branches, stockMovementTypes, shifts }: Props) {
-    // HACK - the shift, and stockMovementType needs to be the data type but i will skip it for now, because
-    // backend return value, label — in the future make it directly check from enum
-    const { data, setData, post, processing, errors } = useForm<{
+export default function EditOut({ inventory, branches, stockMovementTypes, shifts }: Props) {
+    // HACK - same as CreateOut: shift / stock_movement_type should be enum-typed once
+    // the backend returns something we can check directly against an enum.
+    const { data, setData, put, processing, errors } = useForm<{
         branch_id: number | '';
         productList: ProductRow[];
-
-        // HACK - shift needs to be enum not just String, same with stock_movement
         shift: string;
         stock_movement_type: string|null;
         cash_amount: number;
@@ -58,15 +70,16 @@ export default function CreateOut({ branches, stockMovementTypes, shifts }: Prop
         remitted_expenses: number|null;
         net_cash: number;
     }>({
-        branch_id: '',
-        productList: [{ product_id: '', quantity: 1 }],
-        shift: '',
-        stock_movement_type: '',
-        cash_amount: 0,
-        cash_shortage: 0,
-        gcash_amount: 0,
-        cash_advance: 0,
-        remitted_expenses: 0,
+        branch_id: inventory.branch_id,
+        // fall back to one empty row if, for some reason, the record has no items
+        productList: inventory.productList.length > 0 ? inventory.productList : [{ product_id: '', quantity: 1 }],
+        shift: inventory.shift,
+        stock_movement_type: inventory.stock_movement_type,
+        cash_amount: inventory.cash_amount,
+        cash_shortage: inventory.cash_shortage,
+        gcash_amount: inventory.gcash_amount,
+        cash_advance: inventory.cash_advance,
+        remitted_expenses: inventory.remitted_expenses,
         net_cash: 0,
     });
 
@@ -85,12 +98,15 @@ export default function CreateOut({ branches, stockMovementTypes, shifts }: Prop
         );
     }, [data.cash_amount, data.gcash_amount, data.cash_advance, data.remitted_expenses, data.cash_shortage]);
 
+    // NOTE - unlike CreateOut, we do NOT reset productList when branch changes here.
+    // Switching branch on an edit is an edge case (it implies moving the whole sale
+    // to a different branch's stock) — if you want CreateOut's reset-on-change
+    // behavior here too, uncomment the productList reset below.
     function handleBranchChange(branchId: number) {
         setData((prev) => ({
             ...prev,
             branch_id: branchId,
-            // reset product rows — stock differs per branch
-            productList: [{ product_id: '', quantity: 1 }],
+            // productList: [{ product_id: '', quantity: 1 }],
         }));
     }
 
@@ -116,8 +132,6 @@ export default function CreateOut({ branches, stockMovementTypes, shifts }: Prop
         return selectedBranch.products.find((p) => p.id === productId)?.quantity ?? 0;
     }
 
-    // ids already picked in other rows, so the same product can't be
-    // sold twice in one submission
     function pickedElsewhere(index: number): number[] {
         return data.productList
             .filter((_, i) => i !== index)
@@ -128,9 +142,9 @@ export default function CreateOut({ branches, stockMovementTypes, shifts }: Prop
     function submit(e: FormEvent) {
         e.preventDefault();
         setData('net_cash', total_cash);
-        post(storeOut().url, {
+        put(updateOut(inventory.id).url, {
             data: {
-                ...data
+                ...data,
             },
         });
     }
@@ -138,7 +152,7 @@ export default function CreateOut({ branches, stockMovementTypes, shifts }: Prop
     return (
         <div className="p-6">
             <div className="mb-6">
-                <h1 className="text-3xl font-extrabold tracking-tight text-ink">Inventory Out</h1>
+                <h1 className="text-3xl font-extrabold tracking-tight text-ink">Edit Inventory Out</h1>
             </div>
 
             <form onSubmit={submit} className="w-full">
@@ -180,7 +194,10 @@ export default function CreateOut({ branches, stockMovementTypes, shifts }: Prop
                                 Add Product
                             </Button>
                         </div>
-                        <p className="mb-4 text-xs text-subtle">Only products already stocked at the selected branch can be sold.</p>
+                        <p className="mb-4 text-xs text-subtle">
+                            Editing recalculates stock against this record's original quantities — the branch
+                            totals shown below already reflect this record's current effect.
+                        </p>
 
                         <div className="space-y-3">
                             {data.productList.map((row, i) => {
@@ -225,7 +242,6 @@ export default function CreateOut({ branches, stockMovementTypes, shifts }: Prop
                                             type="number"
                                             step="0.01"
                                             min="0.01"
-                                            max={stock ?? undefined}
                                             className="bg-white sm:w-28"
                                             placeholder="Qty sold"
                                             value={row.quantity}
@@ -309,7 +325,7 @@ export default function CreateOut({ branches, stockMovementTypes, shifts }: Prop
                     {/* Actions */}
                     <div className="flex justify-end border-t border-[#f0ddc8] bg-white/60 px-6 py-4">
                         <Button type="submit" disabled={processing} className="bg-green-600 font-bold text-white hover:bg-green-700">
-                            {processing ? 'Saving…' : 'Save Sale'}
+                            {processing ? 'Saving…' : 'Update Sale'}
                         </Button>
                     </div>
                 </div>

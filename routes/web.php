@@ -17,10 +17,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/', [ProductController::class, 'index'])->name('index');
             Route::get('/create', [ProductController::class, 'create'])->name('create');
             Route::post('/', [ProductController::class, 'store'])->name('store');
-            Route::get('/{id}/edit', [ProductController::class, 'edit'])->name('edit');
+            Route::get('/{product}/edit', [ProductController::class, 'edit'])->name('edit');
 
-            Route::delete('/{id}', [ProductController::class, 'delete'])->name('delete');
-            Route::put('/{id}', [ProductController::class, 'update'])->name('update');
+            Route::delete('/{product}', [ProductController::class, 'delete'])->name('delete');
+            Route::put('/{product}', [ProductController::class, 'update'])->name('update');
         }
     );
 
@@ -39,10 +39,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/out', [InventoryController::class, 'storeOut'])
                 ->name('store-out');
 
-            Route::get('/{id}/edit', [InventoryController::class, 'edit'])->name('edit');
-            Route::put('/{id}', [InventoryController::class, 'update'])->name('update');
+            // just call ui
+            Route::get('/{inventory}/edit-in', [InventoryController::class, 'editIn'])->name('edit-in');
+            Route::put('/{inventory}/in', [InventoryController::class, 'inUpdate'])->name('in-update');
 
-            Route::delete('/{id}', [InventoryController::class, 'delete'])->name('delete');
+            Route::get('/{inventory}/edit-out', [InventoryController::class, 'editOut'])->name('edit-out');
+            Route::put('/{inventory}/out', [InventoryController::class, 'updateOut'])->name('update-out');
+
+            Route::delete('/{inventory}', [InventoryController::class, 'delete'])->name('delete');
 
         }
     );
@@ -61,10 +65,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/', [BranchController::class, 'store'])->name('store');
 
             // just call ui
-            Route::get('/{id}/edit', [BranchController::class, 'edit'])->name('edit');
-            Route::put('/{id}', [BranchController::class, 'update'])->name('update');
+            Route::get('/{branch}/edit', [BranchController::class, 'edit'])->name('edit');
+            Route::put('/{branch}', [BranchController::class, 'update'])->name('update');
 
-            Route::delete('/{id}', [BranchController::class, 'delete'])->name('delete');
+            Route::delete('/{branch}', [BranchController::class, 'delete'])->name('delete');
 
 
         }
