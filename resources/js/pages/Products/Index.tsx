@@ -10,6 +10,7 @@ import {
     Pencil,
     Search,
     Trash2,
+    X,
 } from 'lucide-react';
 import {
     Table,
@@ -21,6 +22,7 @@ import {
 } from '@/components/ui/table';
 import { create, deleteMethod, edit, index as productsIndex } from '@/routes/products';
 import FlashAlerts from '@/components/flash-alerts';
+import { index } from '@/routes/branches';
 
 interface Product {
     id: number;
@@ -62,14 +64,11 @@ export default function Index() {
     const [search, setSearch] = useState(filters?.search ?? '');
     const isFirstRender = useRef(true);
 
-    // Debounced: typing only updates local state immediately. The actual
-    // request to the server waits until 400ms after the user stops typing,
-    // so it doesn't fire on every keystroke — only once they pause.
     useEffect(() => {
-        if (isFirstRender.current) {
-            isFirstRender.current = false;
-            return;
-        }
+        // Nothing to sync — also correctly skips on mount, and skips
+        // StrictMode's duplicate effect invocation, since both see the
+        // same unchanged values.
+        if (search === (filters?.search ?? '')) return;
 
         const timeout = setTimeout(() => {
             router.get(
@@ -80,7 +79,13 @@ export default function Index() {
         }, 400);
 
         return () => clearTimeout(timeout);
-    }, [search]);
+    }, [search, filters?.search]);
+
+    function clearSearch() {
+        setSearch('');
+        router.get(index().url, {}, { preserveState: true, replace: true });
+    }
+
 
     const handleDelete = (id: number, name: string) => {
         if (confirm(`Delete "${name}"? This can't be undone.`)) {
@@ -120,8 +125,18 @@ export default function Index() {
                             {search.length >= 100 && (
 
                                 <p className="absolute left-0 top-full mb-10 text-xs text-danger">
-                                    Search can't be longer than 5 characters.
+                                    Search can't be longer than 100 characters.
                                 </p>
+                            )}
+                             {search && (
+                                <button
+                                    type="button"
+                                    onClick={clearSearch}
+                                    aria-label="Clear search"
+                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-subtle hover:text-brand-orange"
+                                >
+                                    <X className="h-4 w-4 " />
+                                </button>
                             )}
                         </div>
                     </div>
@@ -189,8 +204,8 @@ export default function Index() {
                                     key={i}
                                     href={link.url ?? '#'}
                                     className={`flex items-center rounded-md px-3 py-1 text-sm ${link.active
-                                            ? 'bg-brand-orange text-white'
-                                            : 'text-brand-orange-hover hover:bg-[#fbead9]'
+                                        ? 'bg-brand-orange text-white'
+                                        : 'text-brand-orange-hover hover:bg-[#fbead9]'
                                         } ${!link.url ? 'pointer-events-none opacity-40' : ''}`}
                                 >
                                     {paginationLabel(link.label)}
