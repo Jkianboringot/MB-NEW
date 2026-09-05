@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,9 +10,8 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Box, ChevronLeft, ChevronRight, Megaphone, Pencil, Search, Trash2 } from 'lucide-react';
-import { deleteMethod, index as branchesIndex, products, edit } from '@/routes/branches';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Box, ChevronLeft, ChevronRight, Pencil, Search, Trash2, X } from 'lucide-react';
+import { deleteMethod, index as branchesIndex, products, edit, index } from '@/routes/branches';
 import FlashAlerts from '@/components/flash-alerts';
 
 interface Branch {
@@ -59,17 +58,31 @@ export default function Index() {
     const { processing, delete: destroyForm } = useForm();
     const [search, setSearch] = useState(filters?.search ?? '');
 
-    // Branches are paginated server-side, so search has to round-trip to
-    // the server — client-side filtering would only ever touch whichever
-    // rows are on the current page.
-    function applySearch(value: string) {
-        setSearch(value);
-        router.get(
-            branchesIndex().url,
-            { search: value },
-            { preserveState: true, replace: true },
-        );
+    // Debounced: typing only updates local state immediately. The actual
+    // request to the server waits until 400ms after the user stops typing.
+    // Guarded against firing when `search` already matches what the server
+    // returned — this is what keeps StrictMode's duplicate effect call (and
+    // any other redundant re-fire) from silently resetting pagination back
+    // to page 1 with an empty search.
+    useEffect(() => {
+        if (search === (filters?.search ?? '')) return;
+
+        const timeout = setTimeout(() => {
+            router.get(
+                branchesIndex().url,
+                { search },
+                { preserveState: true, replace: true },
+            );
+        }, 400);
+
+        return () => clearTimeout(timeout);
+    }, [search, filters?.search]);
+
+    function clearSearch() {
+        setSearch('');
+        router.get(index().url, {}, { preserveState: true, replace: true });
     }
+
 
     const handleDelete = (id: number, location: string) => {
         if (confirm(`Delete "${location}"? This can't be undone.`)) {
@@ -101,10 +114,26 @@ export default function Index() {
                             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-orange" />
                             <Input
                                 value={search}
-                                onChange={(e) => applySearch(e.target.value)}
+                                onChange={(e) => setSearch(e.target.value)}
                                 placeholder="Search"
                                 className="w-56 border-brand-orange/40 bg-white pl-9 text-sm"
                             />
+                              {search.length >= 100 && (
+
+                                <p className="absolute left-0 top-full mb-10 text-xs text-danger">
+                                    Search can't be longer than 100 characters.
+                                </p>
+                            )}
+                            {search && (
+                                <button
+                                    type="button"
+                                    onClick={clearSearch}
+                                    aria-label="Clear search"
+                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-subtle hover:text-brand-orange"
+                                >
+                                    <X className="h-4 w-4" />
+                                </button>
+                            )}
                         </div>
                     </div>
 
@@ -132,7 +161,7 @@ export default function Index() {
                         <TableBody>
                             {branches.data.length === 0 && (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="py-10 text-center text-sm text-subtle">
+                                    <TableCell colSpan={6} className="py-10 text-center text-sm text-subtle">
                                         No branches found.
                                     </TableCell>
                                 </TableRow>
@@ -152,12 +181,9 @@ export default function Index() {
                                         <BranchTypeBadge type={branch.branch_type} />
                                     </TableCell>
                                     <TableCell>{branch.products_count}</TableCell>
-                                    <TableCell className="font-medium text-[#7a3b12] text-right" >
-                                    {branch.total_sales !== null ? `₱${branch.total_sales} ` : '—'}
-                                      
+                                    <TableCell className="text-right font-medium text-[#7a3b12]">
+                                        {branch.total_sales !== null ? `₱${branch.total_sales}` : '—'}
                                     </TableCell>
-
-
                                     <TableCell>
                                         <div className="flex items-center justify-end gap-4">
                                             <Link
@@ -169,7 +195,6 @@ export default function Index() {
                                             </Link>
                                             <Link
                                                 href={edit(branch.id).url}
-
                                                 className="flex items-center gap-1 text-sm font-medium text-ink hover:text-brand-orange"
                                             >
                                                 <Pencil className="h-4 w-4" />
