@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Input } from '@/components/ui/input';
 import {
     Table,
@@ -9,7 +9,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { ChevronLeft, ChevronRight, Megaphone, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Megaphone, Search, X } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { index } from '@/routes/sales';
 
@@ -64,18 +64,31 @@ export default function Index() {
     const { sales, filters, flash } = usePage<PageProps & Record<string, unknown>>().props as unknown as PageProps;
     const [search, setSearch] = useState(filters?.search ?? '');
 
-    // Sales are paginated server-side (15/page), so search has to round-trip
-    // to the server too — filtering sales.data client-side would only ever
-    // search whichever 15 rows are on the current page.
-    function applySearch(value: string) {
-        setSearch(value);
-        router.get(
-            index().url,
-            { search: value },
-            { preserveState: true, replace: true },
-        );
-    }
+    // Debounced: typing only updates local state immediately. The actual
+    // request waits until 400ms after the user stops typing. Guarded
+    // against firing when `search` already matches the server-confirmed
+    // filters.search — prevents a stray/duplicate effect fire (e.g. React
+    // StrictMode's double-invoke) from silently resetting pagination.
+    useEffect(() => {
+        if (search === (filters?.search ?? '')) return;
 
+        const timeout = setTimeout(() => {
+            router.get(
+                index().url,
+                { search },
+                { preserveState: true, replace: true },
+            );
+        }, 400);
+
+        return () => clearTimeout(timeout);
+    }, [search, filters?.search]);
+
+    // Bypasses the debounce entirely for an instant clear — safe because
+    // the effect's guard above no-ops once filters.search catches up.
+    function clearSearch() {
+        setSearch('');
+        router.get(index().url, {}, { preserveState: true, replace: true });
+    }
 
     return (
         <div className="p-4">
@@ -99,15 +112,11 @@ export default function Index() {
             )}
             <Head title="Sales" />
 
-
             <div className="p-6">
-
                 <div className="mb-6 flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-extrabold tracking-tight text-ink">Sale</h1>
-                        {/* <p className="mt-1 text-sm text-subtle">Stock movements across all branches.</p> */}
                     </div>
-
                 </div>
 
                 <div className="overflow-hidden rounded-xl border border-[#f0ddc8] bg-[#fdf8f2]">
@@ -116,10 +125,26 @@ export default function Index() {
                             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-orange" />
                             <Input
                                 value={search}
-                                onChange={(e) => applySearch(e.target.value)}
+                                onChange={(e) => setSearch(e.target.value)}
                                 placeholder="Search"
-                                className="w-56 border-brand-orange/40 bg-white pl-9 text-sm"
+                                className="w-56 border-brand-orange/40 bg-white pl-9 pr-8 text-sm"
                             />
+                              {search.length >= 100 && (
+
+                                <p className="absolute left-0 top-full mb-10 text-xs text-danger">
+                                    Search can't be longer than 100 characters.
+                                </p>
+                            )}
+                            {search && (
+                                <button
+                                    type="button"
+                                    onClick={clearSearch}
+                                    aria-label="Clear search"
+                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-subtle hover:text-brand-orange"
+                                >
+                                    <X className="h-4 w-4" />
+                                </button>
+                            )}
                         </div>
                     </div>
 

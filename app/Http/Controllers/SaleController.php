@@ -95,11 +95,20 @@ class SaleController extends Controller
     // }
 // SaleController.php
 
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->string('search')->trim();
+
         $sale = Sale::with(['branch', 'encoder', 'inventory'])
+            ->when($search->isNotEmpty(), function ($query) use ($search) {
+                $query->whereHas('branch', function ($q) use ($search) {
+                    $q->where('name', 'like', "{$search}%")
+                        ->orWhere('location', 'like', "{$search}%");
+                });
+            })
             ->latest()
             ->paginate(15)
+            ->withQueryString()
             ->through(fn(Sale $sl) => [
                 'id' => $sl->id,
                 'branch' => $sl->branch?->name,
@@ -115,7 +124,9 @@ class SaleController extends Controller
                 'created_at' => $sl->created_at->format('M d, Y g:i A'),
             ]);
 
-
-        return Inertia::render('Sales/Index', ['sales' => $sale]);
+        return Inertia::render('Sales/Index', [
+            'sales' => $sale,
+            'filters' => $request->only(['search']),
+        ]);
     }
 }
