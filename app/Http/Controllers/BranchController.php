@@ -152,7 +152,7 @@ class BranchController extends Controller
                 'total_sales'
             )
             ->when($request->string('search')->trim(), function ($query, $search) {
-                $query->where('location', 'like', "%{$search}%");
+                $query->where('name', 'like', "{$search}%");
             })
             ->paginate(15)
             ->withQueryString();
